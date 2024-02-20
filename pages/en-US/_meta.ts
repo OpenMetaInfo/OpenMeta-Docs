@@ -23,5 +23,15 @@ export default {
   about: {
     title: "About",
     type: "page"
+  },
+  privacy: {
+    title: "Privacy Policy",
+    type: "page",
+    display: "hidden",
+  },
+  terms: {
+    title: "Terms of Service",
+    type: "page",
+    display: "hidden",
   }
 }

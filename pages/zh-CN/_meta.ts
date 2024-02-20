@@ -23,5 +23,15 @@ export default {
   about: {
     title: "关于",
     type: "page"
+  },
+  privacy: {
+    title: "隐私政策",
+    type: "page",
+    display: "hidden",
+  },
+  terms: {
+    title: "服务条款",
+    type: "page",
+    display: "hidden",
   }
 }
