@@ -1,2 +1,2 @@
 # OpenMeta-Docs
-The website and documentation of OpenMeta.
+The website and documentations of OpenMata
