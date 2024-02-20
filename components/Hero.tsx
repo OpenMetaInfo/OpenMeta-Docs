@@ -37,7 +37,7 @@ export default function Hero(locale: string) {
           {heroMap[locale].subtitleTwo}
         </p>
         <div className={styles.actions}>
-          <Link className={styles.cta} href={`./${locale}/docs`}>
+          <Link className={styles.cta} href={`${locale}/docs`}>
             {heroMap[locale].cta}
           </Link>
           <a
