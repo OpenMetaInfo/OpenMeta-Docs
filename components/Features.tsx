@@ -4,7 +4,7 @@ import styles from './Features.module.css';
 export default function Features(locale: string) {
   const featuresMap = {
     '/en-US': {
-      feature1: 'Metadata Management',
+      feature1: 'Metadata Driven',
       feature1Description: 'Model metadata, field metadata, interface metadata, etc. Metadata versioning and multi-environment publishing',
       feature2: 'Flow',
       feature2Description: 'Automation flows, business processes, scheduled task flows. Built-in AI integration and interaction capabilities.',
@@ -21,12 +21,13 @@ export default function Features(locale: string) {
       feature8: 'Multi-database',
       feature8Description: 'Supports mainstream relational databases, such as PostgreSQL, MySQL, etc., with database dialect abstraction.',
       feature9: 'Multi-tenancy',
+      feature9Description: 'Supports multi-tenant sharing of schemas, intended for standardized SaaS scenarios only.'
     },
     '/zh-CN': {
-      feature1: '元数据管理',
+      feature1: '元数据驱动',
       feature1Description: '模型元数据，字段元数据，界面元数据等，元数据版本化和多环境发布。',
       feature2: 'Flow',
-      feature2Description: '自动化流程，业务审批流程，定时任务流程，内置AI集成与交互能力。',
+      feature2Description: '自动化流程，业务审批流程，定时任务流程，内置 AI 集成与交互能力。',
       feature3: 'OpenAPI',
       feature3Description: '标准 OpenAPI，AI 可理解的 API，Swagger 接口文档。',
       feature4: '安全管控',

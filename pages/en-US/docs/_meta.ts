@@ -4,5 +4,6 @@ export default {
   deploy: "Deployment",
   features: "Features",
   develop: "Development",
+  contribution: "Contribution",
   faq: "FAQ"
 }

@@ -1,0 +1,8 @@
+
+.segmentLine {
+  color: #ddd;
+}
+
+:global(.dark) .segmentLine {
+  border: 1px solid #888;
+}

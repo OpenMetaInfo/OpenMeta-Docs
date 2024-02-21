@@ -6,15 +6,15 @@ export default function Hero(locale: string) {
     '/en-US': {
       headlineOne: 'Metadata-driven framework ',
       headlineTwo: 'Medium and large enterprise applications',
-      subtitleOne: 'OpenMeta is a framework designed for medium to large-scale application.',
-      subtitleTwo: 'Safety, professionalism, strict, and sustainable evolution.',
+      subtitleOne: 'OpenMeta is an enterprise-grade framework with the upcoming milestone of open-sourcing ERP applications.',
+      subtitleTwo: 'Safety, professionalism, strict, and sustainable evolution are the core values of OpenMeta.',
       cta: 'Get Started'
     },
     '/zh-CN': {
       headlineOne: '元数据驱动架构 ',
-      headlineTwo: '中大型企业级应用',
-      subtitleOne: 'OpenMeta 是基于元数据驱动的应用开发框架，定位中大型企业级应用。',
-      subtitleTwo: '安全，专业，严谨，可持续演化，是 OpenMeta 追求的目标。',
+      headlineTwo: '内置 AI 集成与交互的企业级应用',
+      subtitleOne: 'OpenMeta 是一个企业级应用开发框架，下一个里程碑是开源ERP应用。',
+      subtitleTwo: '安全，专业，严谨，可持续演化，是 OpenMeta 的核心价值。',
       cta: '开始使用'
     }
   }

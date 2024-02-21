@@ -4,5 +4,6 @@ export default {
   deploy: "部署",
   features: "特性",
   develop: "开发文档",
+  contribution: "参与贡献",
   faq: "常见问题"
 }

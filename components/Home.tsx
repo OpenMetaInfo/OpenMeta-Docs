@@ -1,7 +1,8 @@
-import { useRouter } from 'next/router'
-import Features from './Features'
-import Hero from './Hero'
-import Trail from './Trail'
+import { useRouter } from 'next/router';
+import Features from './Features';
+import Hero from './Hero';
+import styles from './Home.module.css';
+import Trail from './Trail';
 
 export default function Home() {
   const { route } = useRouter()
@@ -10,9 +11,9 @@ export default function Home() {
   return (
     <>
       {Hero(locale)}
-      <hr />
+      <hr className={styles.segmentLine}/>
       {Features(locale)}
-      <hr />
+      <hr className={styles.segmentLine}/>
       {Trail(locale)}
     </>
   )

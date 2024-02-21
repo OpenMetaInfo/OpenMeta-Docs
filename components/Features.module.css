@@ -15,6 +15,10 @@
   text-align: center;
 }
 
+:global(.dark) .featureItem {
+  border: 1px solid #888;
+}
+
 /* Override global font styles for h2 */
 .featureItem h2 {
   font-size: 1.5rem; /* Set the desired font size */
