@@ -5,17 +5,17 @@ export default function Hero(locale: string) {
   const heroMap = {
     '/en-US': {
       headlineOne: 'Metadata-driven framework ',
-      headlineTwo: 'Medium and large enterprise applications',
+      headlineTwo: 'Built-in AI integration and interaction',
       subtitleOne: 'OpenMeta is an enterprise-grade framework with the upcoming milestone of open-sourcing ERP applications.',
       subtitleTwo: 'Safety, professionalism, strict, and sustainable evolution are the core values of OpenMeta.',
-      cta: 'Get Started'
+      cta: 'Start Reading'
     },
     '/zh-CN': {
       headlineOne: '元数据驱动架构 ',
-      headlineTwo: '内置 AI 集成与交互的企业级应用',
+      headlineTwo: '内置 AI 能力的企业级应用',
       subtitleOne: 'OpenMeta 是一个企业级应用开发框架，下一个里程碑是开源ERP应用。',
       subtitleTwo: '安全，专业，严谨，可持续演化，是 OpenMeta 的核心价值。',
-      cta: '开始使用'
+      cta: '开始阅读'
     }
   }
 

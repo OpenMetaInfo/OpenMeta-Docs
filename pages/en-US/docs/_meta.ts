@@ -1,6 +1,6 @@
 export default {
   index: "Introduction",
-  design: "Design Philosophy",
+  design: "Design Principles",
   deploy: "Deployment",
   features: "Features",
   develop: "Development",

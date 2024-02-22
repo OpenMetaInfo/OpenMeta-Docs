@@ -1,3 +1,3 @@
-# Design Philosophy
+# Design Principles
 
 ## TODO
