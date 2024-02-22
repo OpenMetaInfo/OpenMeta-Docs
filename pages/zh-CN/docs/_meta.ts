@@ -1,6 +1,7 @@
 export default {
   index: "介绍",
   design: "设计原则",
+  arch: "技术架构",
   deploy: "部署",
   features: "特性",
   develop: "开发文档",
