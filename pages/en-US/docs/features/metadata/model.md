@@ -60,9 +60,9 @@ In scenarios where model data is paginated, when the client specifies a sorting 
 For example, `name ASC` means sorting by the `name` field in ascending order. Multiple fields can have different sorting conditions, and multiple sorting conditions are separated by commas, such as `name ASC, amount DESC`. When ASC or DESC sorting is not specified, ASC ascending order is used by default, equivalent to `name, amount DESC`.
 
 Sorting priority when paginating model data:
-(1) Sorting conditions specified by the client;
-(2) Model's default sorting rule;
-(3) Global default sorting rule ``id ASC``.
+* (1) Sorting conditions specified by the client;
+* (2) Model's default sorting rule;
+* (3) Global default sorting rule ``id ASC``.
 
 No default sorting rule is specified for non-paginated queries.
 
@@ -76,9 +76,9 @@ The display name of model data, used for the display name of One2One and Many2On
 For example, when the display name of the employee model is configured as `name, number`, in scenarios involving One2One, Many2One fields, and searching for employees, it will be displayed as `Employee Name / Employee Number`. The global separator is used between data for multiple fields, and the example uses `/`.
 
 Priority for displaying model data names:
-(1) If the model is configured with `displayName`, use it as a priority;
-(2) If the model is not configured with `displayName` but contains the `name` field, use the `name` field value as the display name;
-(3) If the model has neither `displayName` nor `name`, use `id` as the display name.
+* (1) If the model is configured with `displayName`, use it as a priority;
+* (2) If the model is not configured with `displayName` but contains the `name` field, use the `name` field value as the display name;
+* (3) If the model has neither `displayName` nor `name` field, use `id` as the display name.
 
 ### 2.6 `searchName` Search Name
 
@@ -94,23 +94,23 @@ Read-only field, the database table name corresponding to the model, automatical
 
 Configuration property for versioned management of business data. When the model is configured with `timeline=true`, automatically adds three fields: `sliceId`, `effectiveStartDate`, and `effectiveEndDate`. The business processing rules are outlined as follows, see the timeline design document for details.
 
-(1) When handling timeline model data CRUD, parse the `effectiveDate` parameter;
-(2) Supports querying the timeline at any point in time, and supports modifying and inserting slices;
-(3) To retrieve timeline data across time periods, simply pass the `effectiveStartDate` or `effectiveEndDate` condition parameters in the query.
+* (1) When handling timeline model data CRUD, parse the `effectiveDate` parameter;
+* (2) Supports querying the timeline at any point in time, and supports modifying and inserting slices;
+* (3) To retrieve timeline data across time periods, simply pass the `effectiveStartDate` or `effectiveEndDate` condition parameters in the query.
 
 ### 2.9 `idStrategy` Primary Key Generation Strategy
 
 Supports three primary key generation strategies:
-(1) `DbAutoId`: Database auto-increment primary key ID, the default strategy.
-(2) `ShortUUID`: Programmatically generated short UUID, standard UUID converted to base62, with a maximum length of 22 characters.
-(3) `UUID`: Programmatically generated standard UUID.
-(4) `ExternalId`: External input ID.
+* (1) `DbAutoId`: Database auto-increment primary key ID, the default strategy.
+* (2) `ShortUUID`: Programmatically generated short UUID, standard UUID converted to base62, with a maximum length of 22 characters.
+* (3) `UUID`: Programmatically generated standard UUID.
+* (4) `ExternalId`: External input ID.
 
 ### 2.10 `storageType` Storage Type
 
-(1) `RDBMS`: Storage in a relational database, suitable for everyday business data CRUD scenarios, default storage type.
-(2) `ES`: Model data stored in ElasticSearch, suitable for search, log storage, and other application scenarios.
-(3) `Doris`: OLAP data analysis scenario.
+* (1) `RDBMS`: Storage in a relational database, suitable for everyday business data CRUD scenarios, default storage type.
+* (2) `ES`: Model data stored in ElasticSearch, suitable for search, log storage, and other application scenarios.
+* (3) `Doris`: OLAP data analysis scenario.
 
 ### 2.11 `versionLock` Enable Optimistic Locking
 

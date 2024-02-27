@@ -61,11 +61,11 @@
 如 `name ASC` 表示按照 name 字段值正序排列。支持多个字段使用不同的排序条件，多个排序条件间使用半角逗号间隔，如 `name ASC, amount DESC`，不指定 ASC 或 DESC 排序时，默认采用 ASC 升序排列，即等同于 `name, amount DESC`。
 
 分页查询模型数据时的排序优先级：
-（1）客户端指定的排序条件；
+* （1）客户端指定的排序条件；
 
-（2）模型默认排序规则；
+* （2）模型默认排序规则；
 
-（3）全局默认排序规则 ``id ASC`` 。
+* （3）全局默认排序规则 ``id ASC`` 。
 
 非分页查询不指定默认排序规则。
 
@@ -79,11 +79,11 @@
 如当员工模型的 displayName 配置为 `name, number` 时， One2One、Many2One 字段和下拉搜索员工的场景中，显示为 `员工姓名 / 员工工号`。多个字段的数据之间，使用全局间隔符隔开，示例为 `/`。
 
 模型数据显示名称的优先级：
-（1）如果模型配置了 displayName，则优先使用 displayName；
+* （1）如果模型配置了 displayName，则优先使用 displayName；
 
-（2）如果模型未配置 displayName，但模型包含 name 字段，则使用 name 字段值作为显示名称。
+* （2）如果模型未配置 displayName，但模型包含 name 字段，则使用 name 字段值作为显示名称。
 
-（3）如果模型既没有配置 displayName，也不包含 name，则使用 id 作为显示名称。
+* （3）如果模型既没有配置 displayName，也不包含 name，则使用 id 作为显示名称。
 
 ### 2.6、`searchName` 搜索名称
 
@@ -100,30 +100,30 @@
 
 是否对业务数据进行版本化管理的配置属性，当模型配置 `timeline=true` 时，自动添加 sliceId、effectiveStartDate、effectiveEndDate 三个字段。业务处理规则概要如下，详见时间轴设计文档。
 
-（1）需要CRUD处理时间轴模型数据时，解析 effectiveDate 参数；
+* （1）需要CRUD处理时间轴模型数据时，解析 effectiveDate 参数；
 
-（2）支持查询时间在任意时间点移动，支持修改切片、插入切片。
+* （2）支持查询时间在任意时间点移动，支持修改切片、插入切片。
 
-（3）需要获取跨时间段的时间轴数据时，查询参数中传递 effectiveStartDate 或 effectiveEndDate 条件参数即可。
+* （3）需要获取跨时间段的时间轴数据时，查询参数中传递 effectiveStartDate 或 effectiveEndDate 条件参数即可。
 
 ### 2.9、`idStrategy` 主键生成策略
 
 支持3种主键生成策略：
-（1）DbAutoId：数据库自增主键 ID，默认策略。
+* （1）DbAutoId：数据库自增主键 ID，默认策略。
 
-（2）ShortUUID：程序自动生成的短 UUID，标准 UUID 转 62 进制，最长 22 位字符串。
+* （2）ShortUUID：程序自动生成的短 UUID，标准 UUID 转 62 进制，最长 22 位字符串。
 
-（3）UUID：程序自动生成的标准 UUID。
+* （3）UUID：程序自动生成的标准 UUID。
 
-（4）ExternalId：外部输入 ID
+* （4）ExternalId：外部输入 ID
 
 ### 2.10、`storageType` 存储类型
 
-（1）RDBMS：关系型数据库存储，适合日常业务数据的增删改查场景，默认存储类型
+* （1）RDBMS：关系型数据库存储，适合日常业务数据的增删改查场景，默认存储类型
 
-（2）ES：模型数据存储 ElasticSearch 中，适用于搜索、日志存储等应用场景。
+* （2）ES：模型数据存储 ElasticSearch 中，适用于搜索、日志存储等应用场景。
 
-（3）Doris：OLAP 数据分析场景。
+* （3）Doris：OLAP 数据分析场景。
 
 ### 2.11、`versionLock` 启用乐观锁
 
