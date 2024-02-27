@@ -14,7 +14,7 @@ Let's start by introducing Runtime Metadata.
 
 The model here refers to the data model in the business system, also known as data object. The data model is a core concept in the business system, providing an abstract definition of the properties and relationships of business data. Through the data model, the system can better store, retrieve, and process business data.
 
-In OpenMeta, each model corresponds to a data table for storing data, usually a data table in a relational database. However, OpenMeta also supports storing model data in non-relational databases. By configuring the StorageType property of model metadata, model data can be stored in ElasticSearch, a vector database, or OLAP data analysis storage according to application scenarios.
+In OpenMeta, each model corresponds to a data table for storing data, usually a data table in a relational database. However, OpenMeta also supports storing model data in non-relational databases. By configuring the StorageType property of model metadata, model data can be stored in ElasticSearch, or OLAP data analysis storage according to application scenarios.
 
 ## 2. Model Metadata
 
@@ -121,8 +121,7 @@ In business scenarios where data consistency requirements are high, enabling opt
 Before enabling multi-tenant control, the global multi-tenant configuration needs to be enabled. Then, when enabling multi-tenant control for data models, the model is automatically added with a `tenantId` field. During data CRUD operations, this field is automatically assigned a value, achieving enforced isolation of data between tenants.
 
 ### 2.13 `partitionField` Partition Field
-
-Configuration of the grouping field in automatic partition scenarios. Currently, only supports setting a single partition field.
+Designed for use in large-scale relational database scenarios, the configuration of fields for automatic partitioning currently supports only the setting of a single partitioning field.
 
 ### 2.14 `description` Model Description
 
