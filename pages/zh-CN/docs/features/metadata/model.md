@@ -42,7 +42,7 @@
 
 ### 2.1、labelName 模型标签名称
 
-模型的业务名称名义，如 `产品类别`。
+模型的业务名称，如 `产品类别`。
 
 ### 2.2、modelName 模型技术名称
 
@@ -180,3 +180,23 @@ public class UserProfile extends BaseModel {
 public abstract class TimelineModel extends BaseModel {
 }
 ```
+
+### 3.3、业务模型定义
+
+具体的业务模型继承自 `BaseModel` 或 `TimelineModel` ，如 UserProfile 定义：
+
+```java
+@Data
+@Schema(name = "User Profile")
+@EqualsAndHashCode(callSuper = true)
+public class UserProfile extends BaseModel {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    @Schema(description = "name")
+    private String name;
+}
+```
+
+在自动生成的实体类中，会自动根据模型配置选择父类，不需要开发者手动指定。
