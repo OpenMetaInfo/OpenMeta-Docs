@@ -6,7 +6,6 @@
 ## Technical Components
 ### Frontend Components
 * React
-* NextJS
 ...
 
 ### Backend Components

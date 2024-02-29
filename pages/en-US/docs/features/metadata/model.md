@@ -38,6 +38,7 @@ Model metadata describes and defines the data model, including the storage, stru
 | 12 | multiTenant | Boolean | Enable multi-tenant control | false |  |
 | 13 | partitionField | String | Partition field technical name |  |  |
 | 14 | description | String | Model description |  |  |
+| 15 | modelFields | OneToMany | Model fields |  |  |
 
 ### 2.1 `labelName` Model Label Name
 
@@ -69,7 +70,6 @@ No default sorting rule is specified for non-paginated queries.
 ### 2.5 `displayName` Display Name
 
 > Configure one or more field technical names. When configuring multiple fields, separate them with commas.
->
 
 The display name of model data, used for the display name of One2One and Many2One fields, and the data display name when searching under these two field types. Supports configuring multiple fields, with field technical names separated by commas.
 
@@ -83,7 +83,6 @@ Priority for displaying model data names:
 ### 2.6 `searchName` Search Name
 
 > Configure one or more field technical names. When configuring multiple fields, separate them with commas.
->
 
 Quick search fields, supporting multiple fields in a single search condition. For example, when quick searching for customers, it supports searching for customer name, customer number, and contact phone.
 
@@ -126,6 +125,10 @@ Designed for use in large-scale relational database scenarios, the configuration
 ### 2.14 `description` Model Description
 
 Model description information.
+
+### 2.15、`modelFields` Model Fields
+
+A list of fields for the model, see `Field Metadata`.
 
 ## 3. Model Definition
 
