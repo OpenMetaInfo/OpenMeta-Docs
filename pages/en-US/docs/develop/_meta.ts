@@ -1,8 +1,9 @@
 export default {
   orm: "ORM",
-  db: "Multi-database",
   query: "Query Conditions",
+  dsl: "DSL Extension",
   i18n: "Multi-language",
+  db: "Multi-database",
   tenant: "Multi-tenancy",
   exception: "Exception Handling"
 }

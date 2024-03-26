@@ -26,7 +26,7 @@ Model metadata describes and defines the data model, including the storage, stru
 | --- | --- | --- | --- | --- | --- |
 | 1 | labelName | String | Model label name |  | Required |
 | 2 | modelName | String | Model technical name |  | Required |
-| 3 | enableDisable | Boolean | Enable data disable | false |  |
+| 3 | softDelete | Boolean | Enable soft delete | false |  |
 | 4 | defaultOrder | String | Default sorting rule |  |  |
 | 5 | displayName | OptionList | Display name (field list) |  |  |
 | 6 | searchName | OptionList | Quick search (field list) |  |  |
@@ -48,11 +48,14 @@ The business name of the model, such as `Product Category`.
 
 The technical name of the model, using upper camel case. For example, `ProductCategory`. In scenarios where entity code is generated, it corresponds to the entity class name.
 
-### 2.3 `enableDisable` Enable Data Disable
+### 2.3, `softDelete` Enable Soft Delete
 
-Whether to enable data disable for this model.
+Whether to enable the soft delete function for this model. In business systems, it is necessary to set referenced data models to soft delete to avoid affecting the display of historical data associations.
 
-When configured as `true`, automatically adds a `disable` field to the model. To disable a piece of data, set `disable=true`. Disabled data will not appear in search results by default, unless relevant search conditions are added to the query.
+When the `softDelete` attribute of the model is configured to `true`, the system automatically adds a `disabled` field to the model to express that the deletion behavior is actually disabling the data.
+When the model data is deleted, it is disabled by updating `disabled=true`. The disabled data, by default, will not appear in the search results of relational field references unless related query conditions are actively added in the query.
+
+Note: Here, the scenarios of data soft deletion and data disabling are actually simplified. Since all physically deleted data will be recorded in `ChangeLog`, the behavior of soft deletion is equated to setting the data as disabled.
 
 ### 2.4 `defaultOrder` Default Sorting Rule
 
