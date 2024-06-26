@@ -1,3 +1,5 @@
 # 多租户
 
-## TODO
+## 启用多租户
+
+`enable.multiTenant = true`

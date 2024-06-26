@@ -1,2 +1,5 @@
 # Multi-tenancy
-## TODO
+
+## Enable multi-tenancy
+
+`enable.multiTenant = true`

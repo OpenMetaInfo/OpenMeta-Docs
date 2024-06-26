@@ -2,7 +2,7 @@
 
 ## 1. Introduction to Field Metadata
 
-Field metadata is a collection of descriptive information about model fields. It defines various fields used in business scenarios, including the type, length, default value, required status, read-only status, relationships, and more. Through this metadata, the system can control data responses, processing, and interactions in a unified manner, abstracting common requirements to ensure data consistency, accuracy, and completeness.
+Field metadata is a collection of descriptive information about model fields. It defines various fields used in the business scenario for that model, as well as the field type, length, default value, required status, readonly status, and relationships of each field. Through this metadata, the system can control data response, processing, and interaction according to a unified pattern. It also allows for the abstraction of common requirements, ensuring data consistency, accuracy, and integrity.
 
 ## 2. Field Metadata Attributes
 
@@ -17,27 +17,26 @@ Field metadata is a collection of descriptive information about model fields. It
 | 7 | length | Integer | Field length |  |
 | 8 | scale | Integer | Decimal places |  |
 | 9 | required | Boolean | Required field, default `false` |  |
-| 10 | readonly | Boolean | Read-only field, default `false` |  |
+| 10 | readonly | Boolean | Readonly field, default `false` |  |
 | 11 | hidden | Boolean | Hidden, default `false` |  |
 | 12 | copyable | Boolean | Copyable field, default `true` |  |
 | 13 | searchable | Boolean | Searchable field, default `true` |  |
-| 14 | stored | Boolean | Stored field, default `true` |  |
+| 14 | dynamic | Boolean | Dynamic field, default `false` |  |
 | 15 | translatable | Boolean | Translatable field, default `false` |  |
 | 16 | encrypted | Boolean | Encrypted field, default `false` |  |
-| 17 | desensitized | Boolean | Desensitized field, default `false` |  |
-| 18 | desensitizedType | Option | Desensitization type |  |
-| 19 | computable | Boolean | Computable field, default `false` |  |
-| 20 | expression | String | Computation expression |  |
-| 21 | cascadedField | String | Cascaded field | Relationship attribute |
-| 22 | relatedModel | String | Related model | Relationship attribute |
-| 23 | relatedField | String | Related field | Relationship attribute |
-| 24 | inverseLinkField | String | Inverse link field | Relationship attribute |
-| 25 | autoBindMany | Boolean | Auto-bind Many side, default `false` | Relationship attribute |
-| 26 | autoExpandMany | Boolean | Auto-expand Many side, default `false` | Relationship attribute |
-| 27 | displayName | MultipleString | Display name for relational fields | Relationship attribute |
-| 28 | filters | String | Filtering conditions for relational fields | Relationship attribute |
-| 29 | columnName | String | Data table column name | Read-only |
-| 30 | description | String | Field description |  |
+| 17 | maskingType | Boolean | Masking type |  |
+| 18 | computed | Boolean | Computed field, default `false` |  |
+| 19 | expression | String | Computation expression |  |
+| 20 | cascadedField | String | Cascaded field | Relationship attribute |
+| 21 | relatedModel | String | Related model | Relationship attribute |
+| 22 | relatedField | String | Related field | Relationship attribute |
+| 23 | inverseLinkField | String | Inverse link field | Relationship attribute |
+| 24 | autoBindMany | Boolean | Auto-bind Many side, default `false` | Relationship attribute |
+| 25 | autoExpandMany | Boolean | Auto-expand Many side, default `false` | Relationship attribute |
+| 26 | displayName | MultiString | Display name for relational fields | Relationship attribute |
+| 27 | filters | String | Filtering conditions for relational fields | Relationship attribute |
+| 28 | columnName | String | Data table column name | Read-only |
+| 29 | description | String | Field description |  |
 
 ### 2.1 `labelName` Field Label
 
@@ -53,13 +52,13 @@ The technical name of the field, corresponding to the property name definition o
 
 ### 2.4 `fieldType` Field Type
 
-Predefined field types in the system include string text, various numeric types, date types, option set types, JSON types, and various relationship types. For details, refer to the `FieldType` summary.
+Predefined field types in the system include string text, various numeric types, date types, option set types, JSON types, and various relationship types. For details, refer to the `FieldType` section.
 
 ### 2.5 `optionCode` Option Set Code
 
-Option sets are generally used in scenarios where options are relatively fixed, the number of options is limited, but expansion support is needed. In OpenMeta, all option information is stored in the `Option Set Model` and `Option Set Entry Model`.
+Option sets are generally used in scenarios where options are relatively fixed, the number of options is limited, but expansion support is needed. In OpenMeta, all option information is stored in the `SysOptionSet` and `SysOptionItem`.
 
-When the field type is `Single Select` or `Multi Select`, the `optionCode` option set code property needs to be configured.
+When the field type is `Option` or `MultiOption`, the `optionCode` option set code property needs to be configured.
 
 ### 2.6 `defaultValue` Default Field Value
 
@@ -102,11 +101,10 @@ Whether the data of the current field is copied when duplicating data on the cli
 
 Whether this field can be used as a query condition in a general search scenario. Defaults to `true`, meaning all fields are searchable.
 
-### 2.14 `stored` Stored Field
+### 2.14 `dynamic` Dynamic Field
+Whether this field a dynamic field. The default is `false`. The value of the dynamic field is automatically calculated at runtime and is not stored in the database.
 
-Whether this field is a stored field, defaulting to `true`. All field values are stored in the database.
-
-Scenarios where it can be `false`: dynamic calculation fields, dynamic cascading fields. Values of non-stored fields generally represent the calculated result value of the latest data. When using dynamic calculation fields, consider the impact on client performance and avoid using dynamic calculation fields in scenarios involving large amounts of data.
+Scenarios where it can be `true`: dynamic computed fields, dynamic cascade fields. The value of the dynamic field generally represents the calculation result of the latest data. When using dynamic computed fields, the impact on client performance needs to be considered.
 
 ### 2.15 `translatable` Translatable Field
 
@@ -116,36 +114,33 @@ In multilingual data scenarios, indicates whether the value of this field can be
 
 Whether this field is an encrypted field, defaulting to AES256 encryption.
 
-### 2.17 `desensitized` Desensitized Field
+### 2.17 `maskingType` Masking Type
+When this field contains sensitive data, the data masking type can be configured according to rules for phone numbers, names, ID numbers, bank card numbers, etc.
 
-Indicates whether this field needs data desensitization. `desensitized=true` means that the client will automatically desensitize this field's data when fetching through the API. Desensitization can be configured to replace all or part of the field's data with the `****` string.
+When the client retrieves data through the API, the program will automatically mask the data of this field. The masking method can be configured to replace all or part of the field's data with the `****` string.
 
-Desensitized fields do not affect cascading fields, calculated fields, and other fields calculated on the server. In other words, calculated fields can depend on desensitized fields, and desensitized fields can be calculated fields at the same time.
+Masked fields do not affect cascade fields or calculated fields that are processed on the server side. This means calculated fields can rely on masked fields, or calculated fields can also be masked fields simultaneously.
 
-The client can use the getSensitiveField interface to obtain sensitive data for a specific field, and the server will record access logs for sensitive data during this process.
+The client can obtain sensitive data of specified fields through the `getUnmaskedField` interface, during which the server will record access logs of sensitive data.
 
-### 2.18 `desensitizedType` Desensitization Type
+- `All`: Full masking, replacing all characters with `****`.
+- `Name`: Name masking, retaining the first and last characters, and retaining the last character if the name has only two characters.
+- `Email`: Email masking, retaining the first 4 characters.
+- `PhoneNumber`: Phone number masking, masking the last 4 characters.
+- `IdNumber`: ID number masking, retaining the first and last 4 characters.
+- `CardNumber`: Card number masking, retaining the last 4 characters.
 
-Configuration of desensitization rules, which can be desensitized according to rules for phone numbers, names, ID numbers, and bank card numbers. When the `desensitized` attribute of a field is `true` but no desensitization type is configured, it defaults to full desensitization.
+### 2.18 `computed` Computed Field
 
-- `All`: Full desensitization, replaced entirely with `****`.
-- `Name`: Name desensitization, keeping the first and last characters, or the last character when the name is only 2 characters long.
-- `Email`: Email desensitization, keeping the first 4 characters.
-- `PhoneNumber`: Phone number desensitization, desensitizing the last 4 characters.
-- `IdNumber`: ID number desensitization, keeping the first and last 4 characters.
-- `CardNumber`: Card number desensitization, keeping the last 4 characters.
-
-### 2.19 `computable` Computable Field
-
-Indicates whether this field is a computable field. Computable fields can be configured with computation expressions and depend on other fields of the current model in the computation expression.
+Indicates whether this field is a computed field. Computed fields can be configured with computation expressions and depend on other fields of the current model in the computation expression.
 
 Currently, due to performance considerations, cross-model field references are not supported in a single computation expression. If necessary, you can read field data across models in Flow orchestration and participate in computations.
 
-For `stored=true` computable fields, when the dependent fields change, recalculation is triggered automatically.
+For `dynamic=false` computed fields, when the dependent fields change, recalculation is triggered automatically.
 
-For `stored=false` computable fields, the computation result is not stored in the database. When reading this calculated field, the computation is executed automatically. Therefore, the limitations of non-stored fields need to be considered, which are not suitable for obtaining large amounts of data at once.
+For `dynamic=true` computed fields, the computation result is not stored in the database. When reading this computed field, the computation is executed automatically.
 
-### 2.20 `expression` Computation Expression
+### 2.19 `expression` Computation Expression
 
 In the `expression` expression, you can reference other fields of the current model for computation. In the expression, common utility functions such as arithmetic operations, string functions, and date functions can be used.
 
@@ -153,51 +148,51 @@ For numeric types, high-precision computations are used to avoid precision loss,
 
 OpenMeta uses **[AviatorScript](https://github.com/killme2008/aviatorscript)** as the expression engine and sets it to safe sandbox mode.
 
-### 2.21 `cascadedField` Cascaded Field
+### 2.20 `cascadedField` Cascaded Field
 
 Refers to the values of fields in associated models through OneToOne/ManyToOne field references. The configuration format is dot-separated cascaded fields, with the left side being the OneToOne/ManyToOne field name of the current model, and the right side being the field name of the associated model, such as `productId.productName`.
 
-For `stored=true` cascaded fields, recalculation is triggered automatically when the dependent OneToOne/ManyToOne field changes.
+For `dynamic=false` cascaded fields, recalculation is triggered automatically when the dependent OneToOne/ManyToOne field changes.
 
-For `stored=false` cascaded fields, it means that the cascaded value is not stored in the database. When reading this cascaded field, the latest field values are automatically cascaded.
+For `dynamic=true` cascaded fields, it means that the cascaded value is not stored in the database. When reading this cascaded field, the latest field values are automatically cascaded.
 
 This cascade is a logical cascade, not a database cascade.
 
-### 2.22 `relatedModel` Related Model
+### 2.21 `relatedModel` Related Model
 
 The associated model for relational fields, i.e., the model name for OneToOne, ManyToOne, OneToMany, and ManyToMany field types. For ManyToMany field types, this associated model is the model name of the intermediate table.
 
-### 2.23 `relatedField` Related Field
+### 2.22 `relatedField` Related Field
 
 When the field type is OneToMany or ManyToMany, the field in the related model that references the current model. For OneToOne and ManyToOne, the default value of this property is the `id` of the related model.
 
-### 2.24 `inverseLinkField` Inverse Link Field
+### 2.23 `inverseLinkField` Inverse Link Field
 
 When the field type is ManyToMany, the field name in the target table that is linked to the middle table.
 
-### 2.25 `autoBindMany` Auto-bind Many Side
+### 2.24 `autoBindMany` Auto-bind Many Side
 
 For fields of types OneToMany/ManyToMany, when clients query data without specifying fields to retrieve, whether to automatically bind the retrieval of the current OneToMany/ManyToMany type field. Default is `false`. The prerequisite for automatic binding is that the system configuration enables "Automatically load model fields when fields are not specified."
 
-### 2.26 `autoExpandMany` Auto-expand Many Side
+### 2.25 `autoExpandMany` Auto-expand Many Side
 
 For fields of type ManyToMany, whether to automatically load the default fields of the related model in the returned value. Default is `false`, returning `[ [id, displayName] ... ]` data list.
 
-### 2.27 `displayName` Display Name for Relational Fields
+### 2.26 `displayName` Display Name for Relational Fields
 
 Set the field-level `displayName` property for OneToOne, ManyToOne, ManyToMany, OneToMany relational fields to configure the display name of the related model data. If not configured at the field level, it uses the `displayName` configuration of the related model.
 
-### 2.28 `filters` Filtering Conditions for Relational Fields
+### 2.27 `filters` Filtering Conditions for Relational Fields
 
 Basic filtering conditions for OneToOne, ManyToOne relational fields, used to filter optional data based on business scenarios. When executing queries, clients can carry fixed filtering conditions along with user search conditions; the relationship is an `AND` relationship.
 
-### 2.29 `columnName` Data Table Column Name
+### 2.28 `columnName` Data Table Column Name
 
 Read-only field, the data table column name corresponding to the field, automatically converted from the field name, such as `unit_price`.
 
 When the field name changes, the data table column name is synchronized by default. The automatic modification of the data table can be turned off through the global DDL switch to meet the scenario of submitting DDL in other ways.
 
-### 2.30 `description` Field Description
+### 2.29 `description` Field Description
 
 The business description of the field.
 
@@ -214,8 +209,8 @@ The business description of the field.
 | 7 | Date | Date |  |
 | 8 | DateTime | DateTime |  |
 | 9 | Option | Single select |  |
-| 10 | MultipleOption | Multiple select | [] |
-| 11 | MultipleString | String list | [] |
+| 10 | MultiOption | Multi select | [] |
+| 11 | MultiString | String list | [] |
 | 12 | JSON | JSON |  |
 | 13 | Filter | Filter |  |
 | 14 | OneToOne | OneToOne |  |
@@ -267,13 +262,13 @@ When fetching the value of a single select field through the API, it defaults to
 
 For configuration and usage of option sets, refer to the [Option Set](option) section.
 
-### 3.10 `MultipleOption` Multi Select
+### 3.10 `MultiOption` Multi Select
 
 The difference between multi-select fields and single select fields is that multi-select fields allow multiple selections from the same option set. When saving, a list of code strings for the selected options is passed, and in the database, the codes of multiple option entries are stored, separated by `,`.
 
 When reading the value of a multi-select field through the API, it defaults to returning the format `[[itemCode, itemName], ...]`, i.e., the codes and names of multiple options.
 
-### 3.11 `MultipleString` String List
+### 3.11 `MultiString` String List
 
 Used to store multiple string values through a single field. In the program, it processes a string list object, and in the database, it is stored with `,` as the separator.
 

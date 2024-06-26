@@ -21,23 +21,22 @@
 | 11 | hidden | Boolean | 是否隐藏，默认 `false` |  |
 | 12 | copyable | Boolean | 可复制字段，默认 `true` |  |
 | 13 | searchable | Boolean | 可搜索字段，默认 `true` |  |
-| 14 | stored | Boolean | 存储型字段，默认 `true` |  |
+| 14 | dynamic | Boolean | 动态字段，默认 `false` |  |
 | 15 | translatable | Boolean | 可翻译字段，默认 `false` |  |
 | 16 | encrypted | Boolean | 加密字段，默认 `false` |  |
-| 17 | desensitized | Boolean | 脱敏字段，默认 `false` |  |
-| 18 | desensitizedType | Option | 脱敏类型 |  |
-| 19 | computable | Boolean | 计算型字段，默认 `false` |  |
-| 20 | expression | String | 计算表达式 |  |
-| 21 | cascadedField | String | 级联字段 | 关系属性 |
-| 22 | relatedModel | String | 关联模型 | 关系属性 |
-| 23 | relatedField | String | 关联字段 | 关系属性 |
-| 24 | inverseLinkField | String | 反向连接字段 | 关系属性 |
-| 25 | autoBindMany | Boolean | 自动绑定 Many 端，默认 `false` | 关系属性 |
-| 26 | autoExpandMany | Boolean | 自动展开 Many 端，默认 `false` | 关系属性 |
-| 27 | displayName | MultipleString | 关系型字段显示名称 | 关系属性 |
-| 28 | filters | String | 关系型字段过滤条件 | 关系属性 |
-| 29 | columnName | String | 数据表列名 | 只读 |
-| 30 | description | String | 字段描述 |  |
+| 17 | maskingType | Option | 脱敏类型 |  |
+| 18 | computed | Boolean | 计算型字段，默认 `false` |  |
+| 19 | expression | String | 计算表达式 |  |
+| 20 | cascadedField | String | 级联字段 | 关系属性 |
+| 21 | relatedModel | String | 关联模型 | 关系属性 |
+| 22 | relatedField | String | 关联字段 | 关系属性 |
+| 23 | inverseLinkField | String | 反向连接字段 | 关系属性 |
+| 24 | autoBindMany | Boolean | 自动绑定 Many 端，默认 `false` | 关系属性 |
+| 25 | autoExpandMany | Boolean | 自动展开 Many 端，默认 `false` | 关系属性 |
+| 26 | displayName | MultiString | 关系型字段显示名称 | 关系属性 |
+| 27 | filters | String | 关系型字段过滤条件 | 关系属性 |
+| 28 | columnName | String | 数据表列名 | 只读 |
+| 29 | description | String | 字段描述 |  |
 
 ### 2.1 `labelName` 字段标签
 
@@ -49,7 +48,7 @@
 
 ### 2.3 `fieldName` 字段名
 
-字段的技术名称，对应实体类的属性名称定义，如 `unitPrice`。在查询前，会根据存储类型对字段名进行转换，将字段名转换成 `下划线命名` ，如 `unit_price`。
+字段的技术名称，使用小驼峰命名，对应实体类的属性名称定义，如 `unitPrice`。在查询前，会根据存储类型对字段名进行转换，将字段名转换成 `下划线命名` ，如 `unit_price`。
 
 ### 2.4 `fieldType` 字段类型
 
@@ -102,11 +101,11 @@ Create 场景下默认值的赋值逻辑：
 
 在通用搜索场景中，该字段是否可以作为查询条件。默认为  `true` ，即所有字段都是可搜索的。
 
-### 2.14 `stored` 存储型字段
+### 2.14 `dynamic` 动态字段
 
-该字段是否为存储型字段，默认 `true`，即所有字段值都是存储在数据库中的。
+该字段是否为动态字段，默认 `false`，程序运行时自动计算动态字段的值，该值不存储在数据库中。
 
-可为 `false` 的场景：动态计算字段、动态级联字段，非存储型字段的值一般代表最新数据的计算结果值，使用动态计算字段时，需要考虑对客户端性能的影响，在涉及大量数据的场景下避免使用动态计算字段。
+可为 `true` 的场景：动态计算字段、动态级联字段，动态字段的值一般代表最新数据的计算结果值，使用动态计算字段时，需要考虑对客户端性能的影响。
 
 ### 2.15 `translatable` 可翻译字段
 
@@ -116,17 +115,15 @@ Create 场景下默认值的赋值逻辑：
 
 该字段是否为加密字段，默认使用 AES256 加密。
 
-### 2.17 `desensitized` 脱敏字段
+### 2.17 `maskingType` 脱敏类型
 
-表示该字段是否为需要数据脱敏的字段，`desensitized=true` ，客户端通过 API 获取数据时，程序会自动对该字段的数据进行脱敏处理。脱敏方式可以配置为将字段的全部或部分数据替换为 `****` 字符串。
+当该字段为敏感数据时，配置的数据脱敏类型，可按照手机号、姓名、身份证号、银行卡号规则脱敏等等。
+
+客户端通过 API 获取数据时，程序会自动对该字段的数据进行脱敏处理。脱敏方式可以配置为将字段的全部或部分数据替换为 `****` 字符串。
 
 脱敏字段不影响级联字段、计算型字段这些在服务端计算处理的字段类型，也即计算型字段可以依赖脱敏字段，或计算型字段同时也是脱敏字段。
 
-客户端可以通过 getSensitiveField 接口获取指定字段的敏感数据，在此过程中，服务端将记录敏感数据的访问日志。
-
-### 2.18 `desensitizedType` 脱敏类型
-
-脱敏规则配置，可按照手机号、姓名、身份证号、银行卡号规则脱敏，当字段属性 `desensitized=true` ，但未配置脱敏类型时，默认全脱敏。
+客户端可以通过 `getUnmaskedField` 接口获取指定字段的敏感数据，在此过程中，服务端将记录敏感数据的访问日志。
 
 - `All` : 全部脱敏，全部替换为  `****` 。
 - `Name`：名称脱敏，保留首尾各 1 个字符，当名称只有 2 个字符时，保留最后 1 个字符。
@@ -135,17 +132,17 @@ Create 场景下默认值的赋值逻辑：
 - `IdNumber`：证件号脱敏，保留首尾各 4 位字符。
 - `CardNumber`：卡号码脱敏，保留末尾 4 位字符。
 
-### 2.19 `computable` 计算型字段
+### 2.18 `computed` 计算型字段
 
 表示该字段是否为计算型字段。计算型字段可配置计算表达式，并在计算表达式中依赖当前模型的其它字段。
 
 目前出于性能考虑，不支持在单个计算表达式中跨模型引用字段，如有需要，可以在 Flow 编排中跨模型读取字段数据并参与计算。
 
-`stored=true` 的计算型字段，当依赖的字段发生变化时，自动触发重新计算。
+`dynamic=false` 的计算型字段，当依赖的字段发生变化时，自动触发重新计算。
 
-`stored=false` 的计算型字段，表示计算结果并不存储在数据库中，当读取该计算型字段时，自动执行计算，因此需考虑非存储型字段的局限性，即不适合一次性获取大量数据。
+`dynamic=true` 的计算型字段，表示计算结果并不存储在数据库中，当读取该计算型字段时，自动执行计算。
 
-### 2.20 `expression` 计算表达式
+### 2.19 `expression` 计算表达式
 
 在 `expression` 表达式中，可以引用当前模型的其它字段进行计算。在表达式中，可以进行四则运算，调用字符串函数、日期函数等常用工具函数。
 
@@ -153,51 +150,51 @@ Create 场景下默认值的赋值逻辑：
 
 OpenMeta 引用了 **[AviatorScript](https://github.com/killme2008/aviatorscript)** 作为表达式引擎，并设置为安全沙箱模式。
 
-### 2.21 `cascadedField` 级联字段
+### 2.20 `cascadedField` 级联字段
 
 通过 OneToOne/ManyToOne 字段引用关联模型的字段值，配置格式为点号间隔的级联字段，左侧为当前模型的 OneToOne/ManyToOne 字段名，右侧为关联模型的字段名，如 `productId.productName`。
 
-`stored=true` 的级联字段，当依赖的 OneToOne/ManyToOne 字段发生变化时，自动触发重新计算。
+`dynamic=false` 的级联字段，当依赖的 OneToOne/ManyToOne 字段发生变化时，自动触发重新计算。
 
-`stored=false` 的级联字段，表示级联值并不存储在数据库中，当读取该级联字段时，自动级联读取最新的字段值。
+`dynamic=true` 的级联字段，表示级联值并不存储在数据库中，当读取该级联字段时，自动级联读取最新的字段值。
 
 此级联为逻辑级联，非数据库级联。
 
-### 2.22 `relatedModel` 关联模型
+### 2.21 `relatedModel` 关联模型
 
 关系型字段的关联模型，即 OneToOne、ManyToOne、OneToMany、ManyToMany 字段类型的关联模型名。其中，当字段类型为 ManyToMany 时，这个关联模型是中间表的模型名。
 
-### 2.23 `relatedField` 关联字段
+### 2.22 `relatedField` 关联字段
 
 当字段类型为 OneToMany、ManyToMany 时，关联模型引用当前模型的字段名。OneToOne、ManyToOne 时默认该属性为关联模型的 `id`。
 
-### 2.24 `inverseLinkField` 反向连接字段
+### 2.23 `inverseLinkField` 反向连接字段
 
 当字段类型为 `ManyToMany` 时，中间表关联到目标表的字段名。
 
-### 2.25 `autoBindMany` 自动绑定 Many 端
+### 2.24 `autoBindMany` 自动绑定 Many 端
 
 针对 `OneToMany/ManyToMany` 类型的字段，当客户端查询数据，且未指定要读取的字段时，是否自动绑定读取当前 `OneToMany/ManyToMany` 类型的字段，默认为 `false`。这里自动绑定的前提条件是，系统配置中开启了 `未指定字段时自动加载模型字段` 。
 
-### 2.26 `autoExpandMany` 自动展开 Many 端
+### 2.25 `autoExpandMany` 自动展开 Many 端
 
 针对 `ManyToMany` 类型的字段，在返回值中，是否自动加载关联模型的默认字段，默认为 `false`， 返回 `[ [id,displayName] …]` 数据列表。
 
-### 2.27 `displayName` 关系型字段显示名称
+### 2.26 `displayName` 关系型字段显示名称
 
 针对 `OneToOne、ManyToOne、ManyToMany、OneToMany` 关系型字段设置字段级别的 `displayName` 属性，配置关联模型数据的显示名称。当字段级别未配置时，则使用关联模型的 `displayName` 配置。
 
-### 2.28 `filters` 关系型字段过滤条件
+### 2.27 `filters` 关系型字段过滤条件
 
 针对 `OneToOne、ManyToOne` 关系型字段的基础筛选条件，用于根据业务场景对可选数据进行过滤，客户端在执行查询时可携带的固定筛选条件，与用户搜索条件是 `AND` 关系。
 
-### 2.29 `columnName` 数据表列名
+### 2.28 `columnName` 数据表列名
 
 只读字段，字段对应的数据表列名，由字段名自动转换，如 `unit_price`。
 
 字段名变化时，默认同步修改数据表列名。可以通过全局 DDL 开关配置关闭自动修改数据表，以满足通过其它方式提交 DDL 的场景。
 
-### 2.30 `description` 字段描述
+### 2.29 `description` 字段描述
 
 字段的业务描述。
 
@@ -214,8 +211,8 @@ OpenMeta 引用了 **[AviatorScript](https://github.com/killme2008/aviatorscript
 | 7 | Date | 日期 |  |
 | 8 | DateTime | 日期时间 |  |
 | 9 | Option | 单选 |  |
-| 10 | MultipleOption | 多选 | [] |
-| 11 | MultipleString | 字符串列表 | [] |
+| 10 | MultiOption | 多选 | [] |
+| 11 | MultiString | 字符串列表 | [] |
 | 12 | JSON | JSON |  |
 | 13 | Filter | Filter |  |
 | 14 | OneToOne | 一对一 |  |
@@ -267,13 +264,13 @@ API 获取单选字段的值时，默认返回 `[itemCode, itemName]` 格式，�
 
 选项集的配置和使用，具体参考 [选项集](option) 章节
 
-### 3.10 `MultipleOption` 多选
+### 3.10 `MultiOption` 多选
 
 多选字段跟单选字段的区别是，多选字段允许从同一个选项集中，选择多个选项，保存时传递选项的编码字符串列表，并在数据库中存储的多个选项条目的编码，使用 `,` 间隔。
 
 API 读取多选字段的值时，默认返回 `[[itemCode, itemName], ... ]` 格式，也即多个选项的编码和名称。
 
-### 3.11 `MultipleString` 字符串列表
+### 3.11 `MultiString` 字符串列表
 
 适用于通过单字段存储多个字符串值，程序中处理字符串列表对象，在数据库中，使用 `,` 间隔存储。
 
