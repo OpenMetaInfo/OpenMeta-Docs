@@ -13,7 +13,9 @@ export default {
   },
   openapi: {
     title: "OpenAPI",
-    type: "page"
+    type: "page",
+    href: "https://api-cn.openmeta.info",
+    newWindow: true
   },
   apps: {
     title: "应用",
