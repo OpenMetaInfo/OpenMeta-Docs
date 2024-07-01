@@ -2,7 +2,7 @@ export default {
   index: "Introduction",
   design: "Design Principles",
   arch: "Technical Arch",
-  deploy: "Deployment",
+  start: "Getting Started",
   features: "Features",
   develop: "Development",
   contribution: "Contribution",
