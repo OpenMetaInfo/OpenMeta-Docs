@@ -1,18 +1,18 @@
 # Query Condition
 
-## 1. Infix Expressions
+## 1. Infix Notation
 
-Infix expressions, where the operator is positioned between two operands, are the most common way to write expressions. This format is ubiquitous in everyday mathematical and logical expressions, exemplified by the simple expression `1 < 2`. In the realm of computing, nearly all high-level programming languages utilize infix expressions as the basis for arithmetic and logical operations, such as `amount > 100`.
+Infix notation is the most common way of writing expressions, characterized by the operator being placed between two operands. It is very common in everyday mathematical calculations and logical expressions. For example, `1 < 2` is a very simple infix expression. In the field of computer science, almost all high-level programming languages use infix notation as the basis for arithmetic and logical operations, such as `amount > 100`.
 
-Infix expressions are intuitive and align with human cognitive habits, making it possible to construct complex logical expressions. Therefore, OpenMeta adopts infix expressions for constructing data query conditions.
+Due to the intuitive and easy-to-understand nature of infix notation, which aligns with human thinking habits and can combine complex logical expressions, OpenMeta uses infix notation to construct data query conditions.
 
-These expressions are highly versatile, capable of expressing straightforward binary relations, such as `a > b`, and facilitating the construction of complex query conditions with nested structures, like `(a > b AND c < d) OR (e = f AND g != h)`. A key rule when using infix expressions is the necessity of parentheses to clarify the precedence among different condition combinations.
+Infix notation is very flexible. It can express simple binary relations, such as `a > b`, and can also construct complex nested query conditions, such as `(a > b AND c < d) OR (e = f AND g != h)`. There is a clear rule when using infix notation: parentheses must be used to clearly express the priority of different condition combinations.
 
-Other operational expressions include:
+Other types of expression notation:
 
-- **Polish Notation (Prefix Expression):** This places the operator before its operands, with computation proceeding from right to left. Although easily parsed and executed by computers, it offers poorer readability for combined conditions.
+**(1) Polish Notation (Prefix Notation)**: This is a method of placing the operator before the operands, with the calculation order from right to left. It is easy for computers to parse and execute, but the readability of combined conditions is relatively poor.
 
-- **Reverse Polish Notation (Postfix Expression):** In contrast to Polish notation, the operator follows its operands, with computation from left to right. This format is also computer-friendly for execution but suffers from poor readability for complex conditions.
+**(2) Reverse Polish Notation (Postfix Notation)**: Contrary to Polish notation, it places the operator after the operands, with the calculation order from left to right. Similarly, it is easy for computers to execute the calculation process, but the readability of combined conditions is relatively poor.
 
 ## 2. Comparison Operators
 
@@ -73,13 +73,13 @@ To enhance query performance in such scenarios, OpenMeta employs an `ID path que
 
 ## 3. Filters Universal Filtering Conditions
 
-In enterprise-level business systems, complex filtering conditions frequently arise, such as professional users customizing search criteria on the client-side or the server-side controlling data access scope based on business attributes. These scenarios require the system to support dynamically combined filtering conditions.
+In enterprise-level business systems, composite filtering conditions are often encountered. For example, professional users may filter data on the client side using custom search conditions, and the server side may control data access scopes based on business attributes. These scenarios require the system to support dynamically composed filtering conditions.
 
-OpenMeta encapsulates common data transformation and comparison functions within a Filters object, facilitating the transmission and manipulation of filtering conditions in the code. It supports structured and semantic query parameters through JSON parsing and ANTLR syntax parsing.
+OpenMeta supports this by defining `Filters` objects, which encapsulate common data transformation and comparison functions. These Filters objects are used to pass and manipulate filtering conditions in the code.
 
 ### 3.1 Structured Query Filters
 
-Structured Filters are categorized into Unit, Tree, and Empty types, corresponding to the smallest query unit, query structure tree, and empty condition, respectively. All query conditions are expressed using infix expressions. Clients can pass parameters as either a single string or a list of strings; if in string format, server-side programs deserialize the string into a Filters object, and if a list of strings, directly invoke Filters parsing function.
+Structured Filters are categorized into Unit, Tree, and Empty types, corresponding to the smallest query unit, query structure tree, and empty condition, respectively. All query conditions are expressed using infix notation. Clients can pass parameters as either a single string or a list of strings; if in string format, server-side programs deserialize the string into a Filters object, and if a list of strings, directly invoke Filters parsing function.
 
 - **Smallest Query Unit:** The smallest query unit, `FilterUnit`, is structured as `[field, operator, value]`, such as querying users named `Tom`: `["name", "=", "Tom"]`. The `operator` in `FilterUnit` is case-insensitive. For a list of supported operators, see the Comparison Operators section.
 
@@ -87,19 +87,62 @@ Structured Filters are categorized into Unit, Tree, and Empty types, correspondi
 
 - **Field Comparison:** OpenMeta supports field comparisons within filtering conditions, such as `fieldA > fieldB`, by replacing the `value` attribute in `FilterUnit: [field, operator, value]` with a placeholder for the reserved field name `@{fieldName}`, like `["fieldA", ">", "@{FieldB}"]`.
 
-### 3.2 Filters Semantic Queries
+### 3.2 Filters Cascading Query
 
-In client query scenarios, professional users can query data by defining `DSL` queries, such as `name = "Tom" OR total > 200`. At this time, it is necessary to provide a simplified yet equally flexible method for defining Filters. OpenMeta supports structured query methods as well as querying using semantic strings.
+In enterprise-level business systems, cascading query scenarios are often encountered. OpenMeta supports connecting relational fields through the chain operator (`.`) to query the main model's data based on the associated model's data conditions.
 
-For structured queries like `[["name", "=", "Tom"], "OR", ["code", "=", "A100"]]`, the semantic query simplifies to: `name = "Tom" OR code = "A100"`.
+The format for defining a cascading query is `[field1.field2.field3.field4Name, operator, value]`. Except for the last-level field, the field types in the field chain can only be OneToOne, ManyToOne, OneToMany, or ManyToMany. The maximum cascading level can be limited in global configuration parameters. For example, `customerId.industryId.name = "Internet"` indicates querying order data where the customer's industry is `Internet`.
 
-Structured query `[["name", "=", "Tom"], "OR", ["code", "=", "A100"]], "AND", ["priority", ">", 1]]`, the semantic query expression is `(name = "Tom" OR code = "A100") AND priority > 1`.
+OpenMeta's cascading query supports multiple cascading conditions and multi-level cascades in Filters, meaning each query unit, `FilterUnit`, can be a cascading query.
 
-In semantic queries, if the value is a string type, double quotes must still be retained. If the value type involves multiple values, `[]` brackets are used.
+Cascading queries are an advanced query technique, serving as a supplementary means for the system to support complex business needs. They allow users to execute multi-level data association queries. In OneToOne and ManyToOne cascading field query scenarios, the server performs multi-table join queries. If high-frequency multi-level cascading query scenarios are encountered, the model structure should be optimized, such as by adding redundant fields in business tables to reduce the levels of cascading queries and improve query performance. For large data volume association query scenarios, consider using the ES search engine.
 
-### 3.3 Implementation of Semantic Queries
+### 3.3 XToMany Query Conditions
 
-For semantic query scenarios, ANTLR syntax parsing is used to convert the user's semantic expressions into Filters objects. The syntax parsing rules are defined as follows:
+In the context of OpenMeta, XToMany represents the field types OneToMany and ManyToMany. The data handling for these two field types has certain similarities in many scenarios.
+
+When encountering OneToMany or ManyToMany fields in query conditions, OpenMeta first queries data based on the filtering conditions of the Many-side model. The query results are then aggregated into the main model's query conditions before executing the final query on the main model's data, which means at least two SQL queries are performed.
+
+The query conditions for OneToMany and ManyToMany fields differ slightly from the logical processing of other field types. When the filtering condition operator is affirmative (i.e., not containing NOT-type operators), if any data in the associated model matches, it indicates that the associated main model data is matched. For negative subQueries (operators like `NOT EQUAL, NOT HAS, NOT IN`), the associated main model data is returned only if none of the associated model's data matches.
+
+## 4. Filters Semantic Query
+### 4.1 Introduction to Filters Semantic Query
+
+In client-side query scenarios, professional users can define `DSL` to query data, such as `name = "Tom" OR total > 200`. At this point, it is necessary to provide a `Filters` definition method that is as simplified as possible while maintaining flexibility. In addition to supporting structured query methods, OpenMeta also supports using semantic strings for queries.
+
+* Semantic query, example 1:
+```
+name = "Tom" OR code = "A100"
+```
+is equivalent to the structured query:
+```
+[
+    ["name", "=", "Tom"],
+    "OR",
+    ["code", "=", "A100"]
+]
+```
+* Semantic query, example 2:
+```
+(name = "Tom" OR code = "A100") AND priority > 1
+```
+is equivalent to the structured query:
+```
+[
+    [
+        ["name", "=", "Tom"],
+        "OR",
+        ["code", "=", "A100"]
+    ],
+    "AND",
+    ["priority", ">", 1]
+]
+```
+In semantic queries, if the value is of string type, double quotes should still be retained. If the value is of multiple values, square brackets `[]` should be used.
+
+### 4.2 Implementation of Semantic Query
+
+In semantic query scenarios, OpenMeta uses `ANTLR` syntax parsing to convert user input semantic expressions into `Filters` objects. The syntax parsing rules are defined as follows:
 
 ```js
 grammar FilterExpr;
@@ -207,32 +250,41 @@ public class FilterExprVisitorImpl extends FilterExprBaseVisitor<Filters> {
 }
 ```
 
-### 3.4 Performance Comparison of Both Methods
+### 4.3 Performance Comparison of Two Methods
 
-Using JMH for benchmarking, executed 10000 times within 1 second, the following query conditions are parsed respectively:
+Using JMH for benchmarking, each query condition was parsed 10,000 times within 1 second:
 
-(1) Structured scenario
-`[[[["name", "=", "Te st"], "AND", ["code", "IN", ["A01"]]], "OR", ["version", "NOT IN", [1]]], "AND", ["priority","!=",21]]`
-(2) Semantic query
-`((name = "Te st" AND code IN ["A01"]) OR version NOT IN [1]) AND priority != 21`
+(1) Semantic Query
+```
+((name = "Te st" AND code IN ["A01"]) OR version NOT IN [1]) AND priority != 21
+```
+(2) Structured Query
+```
+[
+    [
+        [
+            ["name", "=", "Te st"],
+            "AND",
+            ["code", "IN", ["A01"]]
+        ],
+        "OR",
+        ["version", "NOT IN", [1]]
+    ],
+    "AND",
+    ["priority","!=",21]
+]
+```
+
 The test results are as follows:
 
 ![Performance](/image/query_performance.png)
 
-The test results show that structured query parsing is more efficient. Therefore, OpenMeta's server defaults to using structured query and storage, supporting semantic queries on the client side.
+The test results indicate that structured query parsing is relatively more efficient. Therefore, OpenMeta server by default uses structured queries and storage, while also supporting client-side semantic queries. However, this does not mean that semantic query efficiency is very low. From a user experience perspective, clients can fully consider using semantic queries or natural language queries.
 
-### 3.5 Filters Cascading Queries
+### 4.4 AI-Based Natural Language Query
 
-In enterprise business systems, cascading query scenarios are often encountered. OpenMeta supports querying data of the primary model based on conditions of the associated model by connecting relational fields with chain operators (.).
+Semantic query is a method that lies between natural language query and structured query. In `AI Agent` application scenarios, AI can leverage model metadata to convert natural language queries into semantic queries to perform complex data queries.
 
-The definition format for cascading queries is `[field1.field2.field3.field4Name, operator, value]`, except for the last level field, the field chain type can only be OneToOne, ManyToOne, OneToMany, ManyToMany. The maximum cascade level can be limited in global configuration parameters. For example, `customerId.countryId.name = "China"` means querying order data where the customer's country is China.
+Why not directly convert natural language into `SQL` statements? In enterprise-level business systems, a query process not only includes the query conditions specified by the user but also needs to consider user permissions, model query constraints, and factors such as option sets, user language, associated model data, and dynamically calculated data. OpenMeta already supports these scenarios in its underlying implementation of semantic and structured queries.
 
-OpenMeta's cascading queries support multiple cascading conditions and multi-level cascading in Filters, i.e., each query unit FilterUnit can be a cascading query.
-
-Cascading query is an advanced querying technique, serving as a supplemental means for the system to support complex business requirements, allowing users to perform multi-level data association queries. In OneToOne, ManyToOne cascading field query scenarios, the server queries data through multi-table joins. For high-frequency, multi-level cascading query scenarios, optimization should be considered at the model structure level, such as adding redundant fields to business tables to reduce the level of cascading queries and improve query performance.
-
-### 3.6 XToMany Query Conditions
-
-In the context of OpenMeta, XToMany represents the OneToMany and ManyToMany field types, which share certain similarities in many scenarios.
-
-When encountering OneToMany, ManyToMany fields in query conditions, OpenMeta first queries data based on the filtering conditions of the Many side model, aggregates the results into the primary model's query conditions, and then executes the final
+Therefore, converting the user's natural language into system-supported semantic query conditions is an effective way to achieve the integration of `AI Agents` with business systems.
