@@ -43,17 +43,23 @@ As an enterprise-level application development framework, OpenMeta is not bound 
 Conventional multi-tenancy has various sharing modes. The isolation-first tenant model is supported through well-designed deployment architectures. To accommodate scenarios where OpenMeta provides SaaS services with shared schemas for multi-tenancy, OpenMeta provides a configuration switch to enable multi-tenancy. It's essential to note that this scenario is only applicable to standardized SaaS situations.
 
 ## 4. Roadmap
-### 2024-Q1: Develop Basic Framework
-OpenMeta's short-term goal remains focused on developing the foundational framework. The primary objective in this phase is to build the foundational capabilities and key features for enterprise-level application development.
-
-### 2024-Q2: Build Business Applications
-OpenMeta will move towards a new phase of building business applications. The key task in this phase is to implement specific business functionalities based on the widespread demands of the community and the public.
-
-### 2024-Q3: More Business Applications
-Stay tuned...
-
 ### 2024-Q4: More Business Applications
-Stay tuned...
+
+Stay tuned......
+
+### 2024-Q3: Flow and UI Metadata
+
+Stay tuned......
+
+------------------------
+
+### 2024-Q2: ORM and OpenAPI
+
+OpenMeta released the minimum viable product version `0.1.3`, including metadata-driven ORM and the general interface OpenAPI.
+
+### 2024-Q1: Development of the Basic Framework
+
+OpenMeta's short-term goal remains focused on the development of the basic framework. The primary objective of this phase is to build the foundational capabilities and key features of enterprise applications.
 
 ## 5. Conclusion
 OpenMeta will continue to maintain high transparency, actively listen to user feedback, and strive for continuous improvement and enhancement, aiming to become a reliable choice in the field of medium to large-scale enterprise-level applications. Looking forward to the continuous evolution and growth of OpenMeta in 2024.
