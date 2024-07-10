@@ -9,8 +9,8 @@
 ...
 
 ### Backend Components
-* Java 17
-* SpringBoot 3.2.2
+* Java 21 LTS
+* SpringBoot 3.3.0
 * Redis
 * ElasticSearch
 ...
