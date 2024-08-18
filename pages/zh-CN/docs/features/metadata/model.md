@@ -33,7 +33,7 @@
 | 6 | searchName | OptionList | 快捷查询（字段列表） |  |  |
 | 7 | tableName | String | 数据库表 |  | 只读 |
 | 8 | timeline | Boolean | 是否时间轴模型 | false |  |
-| 9 | idStrategy | Option | 主键生成策略 | DbAutoId |  |
+| 9 | idStrategy | Option | 主键生成策略 | DbAutoID |  |
 | 10 | storageType | Option | 存储类型 | RDBMS |  |
 | 11 | versionLock | Boolean | 启用乐观锁 | false |  |
 | 12 | multiTenant | Boolean | 多租户控制 | false |  |
@@ -83,9 +83,7 @@
 
 模型数据显示名称的优先级：
 * （1）如果模型配置了 displayName，则优先使用 displayName；
-
 * （2）如果模型未配置 displayName，但模型包含 name 字段，则使用 name 字段值作为显示名称。
-
 * （3）如果模型既没有配置 displayName，也不包含 name，则使用 id 作为显示名称。
 
 ### 2.6、`searchName` 搜索名称
@@ -111,13 +109,12 @@
 ### 2.9、`idStrategy` 主键生成策略
 
 支持3种主键生成策略：
-* （1）DbAutoId：数据库自增主键 ID，默认策略。
-
-* （2）ShortUUID：程序自动生成的短 UUID，标准 UUID 转 62 进制，最长 22 位字符串。
-
-* （3）UUID：程序自动生成的标准 UUID。
-
-* （4）ExternalId：外部输入 ID
+* （1）DbAutoID：数据库自增主键 ID，默认策略。
+* （2）ULID：唯一有序ID，26个字符长度（Base32）, 10个字符时间戳 + 16个字符随机数。
+* （3）TSIDLong：长整数类型的时间有序ID，SnowflakeID 变种。
+* （4）TSIDString：字符串类型的时间有序ID，13个字符长度，SnowflakeID 变种。
+* （5）UUID：程序自动生成的标准 UUID。
+* （6）ExternalId：外部输入 ID
 
 ### 2.10、`storageType` 存储类型
 

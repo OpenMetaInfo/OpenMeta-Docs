@@ -32,7 +32,7 @@ Model metadata describes and defines the data model, including the storage, stru
 | 6 | searchName | OptionList | Quick search (field list) |  |  |
 | 7 | tableName | String | Database table |  | Read-only |
 | 8 | timeline | Boolean | Is a timeline model | false |  |
-| 9 | idStrategy | Option | Primary key generation strategy | DbAutoId |  |
+| 9 | idStrategy | Option | Primary key generation strategy | DbAutoID |  |
 | 10 | storageType | Option | Storage type | RDBMS |  |
 | 11 | versionLock | Boolean | Enable optimistic locking | false |  |
 | 12 | multiTenant | Boolean | Enable multi-tenant control | false |  |
@@ -103,10 +103,12 @@ Configuration property for versioned management of business data. When the model
 ### 2.9 `idStrategy` Primary Key Generation Strategy
 
 Supports three primary key generation strategies:
-* (1) `DbAutoId`: Database auto-increment primary key ID, the default strategy.
-* (2) `ShortUUID`: Programmatically generated short UUID, standard UUID converted to base62, with a maximum length of 22 characters.
-* (3) `UUID`: Programmatically generated standard UUID.
-* (4) `ExternalId`: External input ID.
+* (1) `DbAutoID`: Database auto-increment primary key ID, the default strategy.
+* (2) `ULID`: Unique Lexicographically Sortable Identifier, 128-bit with 48-bit timestamp and 80-bit random value. 26-character string with 10-character timestamp and 16-character random value.
+* (3) `TSIDLong`: Numeric TSID, Combined SnowflakeID and ULID, 64-bit with 42-bit timestamp, 10-bit server ID and 12-bit sequence number by default.
+* (4) `TSIDString`: 13-character string TSID.
+* (5) `UUID`: Programmatically generated standard UUID, with 32-character hexadecimal string.
+* (6) `ExternalId`: External input ID.
 
 ### 2.10 `storageType` Storage Type
 
