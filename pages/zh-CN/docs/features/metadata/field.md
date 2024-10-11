@@ -198,7 +198,7 @@ OpenMeta 引用了 **[AviatorScript](https://github.com/killme2008/aviatorscript
 
 字段的业务描述。
 
-# 3 字段类型 FieldType
+## 3 字段类型 FieldType
 
 | 序号 | 类型 | 类型名称 | 默认值 |
 | --- | --- | --- | --- |
@@ -220,7 +220,9 @@ OpenMeta 引用了 **[AviatorScript](https://github.com/killme2008/aviatorscript
 | 16 | OneToMany | 一对多 |  |
 | 17 | ManyToMany | 多对多 |  |
 
-> 备注：其中 OneToOne、ManyToOne 的外键为逻辑外键，非数据库物理外键。
+
+* 字段默认值，根据字段类型，自动设零值。
+* OneToOne、ManyToOne 的外键为逻辑外键，非数据库物理外键。
 
 ### 3.1 `String` 字符串
 

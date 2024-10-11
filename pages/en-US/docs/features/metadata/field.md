@@ -196,7 +196,7 @@ When the field name changes, the data table column name is synchronized by defau
 
 The business description of the field.
 
-# 3 Field Types FieldType
+## 3 Field Types FieldType
 
 | No. | Type | Type Name | Default Value |
 | --- | --- | --- | --- |
@@ -218,7 +218,8 @@ The business description of the field.
 | 16 | OneToMany | OneToMany |  |
 | 17 | ManyToMany | ManyToMany |  |
 
-> Note: The foreign keys of OneToOne and ManyToOne are logical foreign keys, not physical database foreign keys.
+* The default value of a field is automatically set to its zero value based on the field type.
+* The foreign keys of OneToOne and ManyToOne are logical foreign keys, not physical database foreign keys.
 
 ### 3.1 `String`
 
