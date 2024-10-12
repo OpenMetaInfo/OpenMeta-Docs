@@ -11,7 +11,7 @@ For more details, refer to the [Query Conditions](develop/query) sections.
 
 ## 3. `EntityService` interface methods
 
-#### Create One Row Data
+### Create One Row Data
 ```java
 /**
  * Create a single data object and return the id.
@@ -21,7 +21,7 @@ For more details, refer to the [Query Conditions](develop/query) sections.
  */
 K createOne(T object);
 ```
-#### Create One Row And Return
+### Create One Row And Return
 ```java
 /**
   * Create a single data object, return the object with id and other latest field values
@@ -31,7 +31,7 @@ K createOne(T object);
   */
 T createOneAndReturn(T object);
 ```
-#### CreateL List
+### Create List
 ```java
 /**
   * Create multiple data objects and return the id list.
@@ -41,7 +41,7 @@ T createOneAndReturn(T object);
   */
 List<K> createList(List<T> objects);
 ```
-#### Create List And Return
+### Create List And Return
 ```java
 /**
   * Create multiple data objects, return the object list with id and other latest field values.
@@ -51,7 +51,7 @@ List<K> createList(List<T> objects);
   */
 List<T> createListAndReturn(List<T> objects);
 ```
-#### Read One Row Data
+### Read One Row Data
 ```java
 /**
   * Read one data object by id.
@@ -62,7 +62,7 @@ List<T> createListAndReturn(List<T> objects);
   */
 T readOne(K id);
 ```
-#### Read One With Specified Fields
+### Read One With Specified Fields
 ```java
 /**
   * Read one data object by id.
@@ -75,7 +75,7 @@ T readOne(K id);
   */
 T readOne(K id, Collection<String> fields);
 ```
-#### Read List
+### Read List
 ```java
 /**
   * Read multiple data objects by ids.
@@ -86,7 +86,7 @@ T readOne(K id, Collection<String> fields);
   */
 List<T> readList(List<K> ids);
 ```
-#### Read List
+### Read List
 ```java
 /**
   * Read multiple data objects by ids.
@@ -99,7 +99,7 @@ List<T> readList(List<K> ids);
   */
 List<T> readList(List<K> ids, Collection<String> fields);
 ```
-#### Update One Row
+### Update One Row
 ```java
 /**
   * Update one data object by its ID. Null values are not ignored.
@@ -109,7 +109,7 @@ List<T> readList(List<K> ids, Collection<String> fields);
   */
 boolean updateOne(T object);
 ```
-#### Update One With `ignoreNull` Parameter
+### Update One With `ignoreNull` Parameter
 ```java
 /**
   * Update one data object by its ID.
@@ -120,7 +120,7 @@ boolean updateOne(T object);
   */
 boolean updateOne(T object, boolean ignoreNull);
 ```
-#### Update One And Return
+### Update One And Return
 ```java
 /**
   * Update one data object by its ID. Null values are not ignored.
@@ -131,7 +131,7 @@ boolean updateOne(T object, boolean ignoreNull);
   */
 T updateOneAndReturn(T object);
 ```
-#### Update One And Return With `ignoreNull` Parameter
+### Update One And Return With `ignoreNull` Parameter
 ```java
 /**
   * Update one data object by its ID.
@@ -143,7 +143,7 @@ T updateOneAndReturn(T object);
   */
 T updateOneAndReturn(T object, boolean ignoreNull);
 ```
-#### Update List
+### Update List
 ```java
 /**
   * Update multiple data objects by their IDs. Null values are not ignored.
@@ -153,7 +153,7 @@ T updateOneAndReturn(T object, boolean ignoreNull);
   */
 boolean updateList(List<T> objects);
 ```
-#### Update List With `ignoreNull` Parameter
+### Update List With `ignoreNull` Parameter
 ```java
 /**
   * Update multiple data objects by their IDs.
@@ -164,7 +164,7 @@ boolean updateList(List<T> objects);
   */
 boolean updateList(List<T> objects, boolean ignoreNull);
 ```
-#### Update List And Return
+### Update List And Return
 ```java
 /**
   * Update multiple data objects by their IDs. Null values are not ignored.
@@ -175,7 +175,7 @@ boolean updateList(List<T> objects, boolean ignoreNull);
   */
 List<T> updateListAndReturn(List<T> objects);
 ```
-#### Update List And Return With `ignoreNull` Parameter
+### Update List And Return With `ignoreNull` Parameter
 ```java
 /**
   * Update multiple data objects by their IDs.
@@ -187,7 +187,7 @@ List<T> updateListAndReturn(List<T> objects);
   */
 List<T> updateListAndReturn(List<T> objects, boolean ignoreNull);
 ```
-#### Delete One Row
+### Delete One Row
 ```java
 /**
   * Delete one data object by ID.
@@ -197,7 +197,7 @@ List<T> updateListAndReturn(List<T> objects, boolean ignoreNull);
   */
 boolean deleteOne(K id);
 ```
-#### Delete List
+### Delete List
 ```java
 /**
   * Delete multiple data objects by IDs.
@@ -207,7 +207,7 @@ boolean deleteOne(K id);
   */
 boolean deleteList(List<K> ids);
 ```
-#### Delete By Filters
+### Delete By Filters
 ```java
 /**
   * Delete data objects by specified filters.
@@ -217,7 +217,7 @@ boolean deleteList(List<K> ids);
   */
 boolean deleteByFilters(Filters filters);
 ```
-#### Get Ids
+### Get Ids
 ```java
 /**
   * Get the ids based on the filters.
@@ -227,7 +227,7 @@ boolean deleteByFilters(Filters filters);
   */
 List<K> getIds(Filters filters);
 ```
-#### Get Relational Field IDs
+### Get Relational Field IDs
 ```java
 /**
   * Get the ids for ManyToOne/OneToOne relational field.
@@ -238,7 +238,7 @@ List<K> getIds(Filters filters);
   */
 List<K> getRelatedIds(Filters filters, String fieldName);
 ```
-#### Search One With Filters
+### Search One With Filters
 ```java
 /**
   * Query a single object based on filters. Only for code use.
@@ -249,7 +249,7 @@ List<K> getRelatedIds(Filters filters, String fieldName);
   */
 T searchOne(Filters filters);
 ```
-#### Search One With FlexQuery
+### Search One With FlexQuery
 ```java
 /**
   * Query a single object based on filters. Only for code use.
@@ -260,7 +260,7 @@ T searchOne(Filters filters);
   */
 T searchOne(FlexQuery flexQuery);
 ```
-#### Search List
+### Search List
 ```java
 /**
   * Query objects without pagination, only for code use.
@@ -270,7 +270,7 @@ T searchOne(FlexQuery flexQuery);
   */
 List<T> searchList();
 ```
-#### Search List With Filters
+### Search List With Filters
 ```java
 /**
   * Query objects based on Filters without pagination, only for code use.
@@ -281,7 +281,7 @@ List<T> searchList();
   */
 List<T> searchList(Filters filters);
 ```
-#### Search List With FlexQuery
+### Search List With FlexQuery
 ```java
 /**
   * Query objects based on FlexQuery without pagination, only for code use.
@@ -292,15 +292,56 @@ List<T> searchList(Filters filters);
   */
 List<T> searchList(FlexQuery flexQuery);
 ```
-#### Pagination Search By FlexQuery
+
+### Search List And Conversion To DTO
+```java
+/**
+ * Searches for objects based on the provided FlexQuery and maps them to the specified DTO class.
+ * If the result exceeds the MAX_BATCH_SIZE, an error log is recorded, but no exception is thrown.
+ *
+ * @param <R> the type of the DTO class
+ * @param flexQuery FlexQuery object, can set fields, filters, orders, etc.
+ * @param dtoClass the class of the objects to be returned
+ * @return object list of the specified DTO class
+ */
+<R> List<R> searchList(FlexQuery flexQuery, Class<R> dtoClass);
+```
+
+### Pagination Search By FlexQuery
 ```java
 /**
   * Query objects based on FlexQuery with pagination.
   * The page size cannot exceed the MAX_BATCH_SIZE.
   *
   * @param flexQuery FlexQuery object, can set fields, filters, orders, etc.
-  * @param page page object
-  * @return objects in the page
+  * @param page the Page object containing pagination information
+  * @return a Page object containing the objects
   */
 Page<T> searchPage(FlexQuery flexQuery, Page<T> page);
+```
+
+### Pagination Search And Conversion To DTO
+```java
+/**
+ * Query objects based on FlexQuery with pagination and map them to the specified DTO class.
+ * The page size cannot exceed the MAX_BATCH_SIZE.
+ *
+ * @param <R> the type of the DTO class
+ * @param flexQuery FlexQuery object, can set fields, filters, orders, etc.
+ * @param page the Page object containing pagination information
+ * @param dtoClass the class of the objects to be returned
+ * @return a Page object containing the DTO objects
+ */
+<R> Page<R> searchPage(FlexQuery flexQuery, Page<R> page, Class<R> dtoClass);
+```
+### Query And Group By ID
+```java
+/**
+ * Groups objects by their ID based on the provided filters.
+ * If the result exceeds the MAX_BATCH_SIZE, an error log is recorded, but no exception is thrown.
+ *
+ * @param filters the filters to apply when searching for objects
+ * @return objects map (id -> object)
+ */
+Map<Long, T> groupById(Filters filters);
 ```
