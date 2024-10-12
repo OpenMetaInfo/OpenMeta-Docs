@@ -1,4 +1,5 @@
 export default {
+  api: "通用接口",
   orm: "ORM",
   query: "查询条件",
   dsl: "DSL 扩展",

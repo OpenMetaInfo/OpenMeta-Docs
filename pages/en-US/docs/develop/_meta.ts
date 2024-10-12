@@ -1,4 +1,5 @@
 export default {
+  api: "Common API",
   orm: "ORM",
   query: "Query Conditions",
   dsl: "DSL Extension",
