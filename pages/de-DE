@@ -1,10 +1,39 @@
 export default {
-  api: "通用接口",
-  orm: "ORM",
-  query: "查询条件",
-  dsl: "DSL 扩展",
-  i18n: "多语言翻译",
-  db: "多数据库",
-  tenant: "多租户",
-  exception: "异常处理"
+  index: {
+    type: "page",
+    title: "元数据驱动的应用开发框架",
+    display: "hidden",
+    theme: {
+      layout: "raw"
+    }
+  },
+  docs: {
+    title: "文档",
+    type: "page"
+  },
+  openapi: {
+    title: "OpenAPI",
+    type: "page",
+    href: "https://api-cn.openmeta.info",
+    newWindow: true
+  },
+  apps: {
+    title: "应用",
+    type: "page",
+    display: "hidden"
+  },
+  about: {
+    title: "关于",
+    type: "page"
+  },
+  privacy: {
+    title: "隐私政策",
+    type: "page",
+    display: "hidden"
+  },
+  terms: {
+    title: "服务条款",
+    type: "page",
+    display: "hidden"
+  }
 };
