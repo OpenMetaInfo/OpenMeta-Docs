@@ -1,0 +1,3 @@
+files:
+  - source: /pages/zh-CN
+    translation: /pages/%locale%
