@@ -4,7 +4,8 @@ export default {
   query: "Query Conditions",
   dsl: "DSL Extension",
   i18n: "Multi-language",
-  db: "Multi-database",
+  datasource: "Multi-datasource",
+  database: "Multi-database",
   tenant: "Multi-tenancy",
   exception: "Exception Handling"
 }
