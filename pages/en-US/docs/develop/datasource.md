@@ -14,7 +14,7 @@ The datasource name can be customized in the `application.yml` file.
 spring:
   datasource:
     dynamic:
-      enabled: true
+      enable: true
       datasource:
         primary:
           driver-class-name: com.mysql.cj.jdbc.Driver
