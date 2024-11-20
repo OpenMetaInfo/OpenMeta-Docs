@@ -180,7 +180,9 @@ For fields of type ManyToMany, whether to automatically load the default fields 
 
 ### 2.26 `displayName` Display Name for Relational Fields
 
-Set the field-level `displayName` property for OneToOne, ManyToOne, ManyToMany, OneToMany relational fields to configure the display name of the related model data. If not configured at the field level, it uses the `displayName` configuration of the related model.
+Set the field-level `displayName` property for OneToOne, ManyToOne, ManyToMany, OneToMany relational fields to configure the display name of the related model data.
+
+If not configured at the relational fields, it uses the `displayName` configuration of the related model.
 
 ### 2.27 `filters` Filtering Conditions for Relational Fields
 

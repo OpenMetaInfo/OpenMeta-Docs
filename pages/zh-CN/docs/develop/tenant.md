@@ -1,5 +1,45 @@
 # 多租户
+OpenMeta 从 ORM 支持多租户，启用多租户后，自动根据租户隔离数据，无需开发人员写代码处理。
 
 ## 启用多租户
+在配置文件中设置 `enable.multiTenant` 启用多租户。如：
+```yaml
+enable:
+  multiTenant: true
+```
 
-`enable.multiTenant = true`
+## 多租户模型
+启用多租户后，可以从模型级别设置是否进行租户数据隔离。
+模型启用多租户隔离的条件：
+* 模型元数据设置 `multiTenant = true`，通过`multiTenant`属性控制哪些数据模型进行多租户隔离，也即`multiTenant = false`的模型可以在租户间共享。
+
+* 给模型添加 `tenantId` 字段。该字段属性全局表现为只读，创建时根据当前用户的所属租户，填充`tenantId`字段值，且不允许修改。
+
+
+## 租户间数据隔离方案
+启用多租户后，ORM 会进行强制隔离和校验，且上下文 Context 中记录了当前用户的 tenantId（下文用 `user.tenantId` 表示）。
+
+#### 简单查询
+ORM 层强制在 WHERE 条件中追加租户过滤条件：
+```sql
+tenant_id = user.tenantId
+```
+
+#### JOIN 查询
+主表和关联表都会被自动追加租户过滤条件
+```sql
+t0.tenant_id = user.tenantId  AND t1.tenant_id = user.tenantId
+```
+
+#### 创建数据
+创建数据时，ORM 层自动填充 `tenantId` 字段值：
+```java
+tenantId = user.tenantId
+```
+如果客户端传递的数据指定了 tenantId，且值与当前用户的 tenantId 不相同，程序会抛出异常，需要关注可能发生的越权尝试事件。
+
+#### 更新数据
+由于数据模型的 tenantID 是只读字段，ORM 层会自动忽略对 tenantId 的修改。
+
+#### 删除数据
+删除前，ORM 层会检查数据范围，仅能删除当前用户所属租户的数据。
