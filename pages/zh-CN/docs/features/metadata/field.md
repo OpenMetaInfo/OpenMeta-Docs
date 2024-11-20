@@ -182,7 +182,9 @@ OpenMeta 引用了 **[AviatorScript](https://github.com/killme2008/aviatorscript
 
 ### 2.26 `displayName` 关系型字段显示名称
 
-针对 `OneToOne、ManyToOne、ManyToMany、OneToMany` 关系型字段设置字段级别的 `displayName` 属性，配置关联模型数据的显示名称。当字段级别未配置时，则使用关联模型的 `displayName` 配置。
+针对 `OneToOne、ManyToOne、ManyToMany、OneToMany` 关系型字段设置字段级别的 `displayName` 属性，配置关联模型数据的显示名称。
+
+当关系型字段本身未配置 `displayName` 属性时，则使用关联模型的 `displayName` 配置。
 
 ### 2.27 `filters` 关系型字段过滤条件
 
