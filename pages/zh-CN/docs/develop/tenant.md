@@ -1,5 +1,5 @@
 # 多租户
-OpenMeta 从 ORM 支持多租户，启用多租户后，自动根据租户隔离数据，无需开发人员写代码处理。
+OpenMeta 从 ORM 层支持多租户。启用多租户后，自动根据租户隔离数据，无需开发人员写代码处理。
 
 ## 启用多租户
 在配置文件中设置 `enable.multiTenant` 启用多租户。如：
@@ -8,7 +8,7 @@ enable:
   multiTenant: true
 ```
 
-## 多租户模型
+## 多租户数据模型
 启用多租户后，可以从模型级别设置是否进行租户数据隔离。
 模型启用多租户隔离的条件：
 * 模型元数据设置 `multiTenant = true`，通过`multiTenant`属性控制哪些数据模型进行多租户隔离，也即`multiTenant = false`的模型可以在租户间共享。
@@ -26,7 +26,7 @@ tenant_id = user.tenantId
 ```
 
 #### JOIN 查询
-主表和关联表都会被自动追加租户过滤条件
+主表和关联表都会被自动追加租户过滤条件，无需开发人员代码干预。
 ```sql
 t0.tenant_id = user.tenantId  AND t1.tenant_id = user.tenantId
 ```
@@ -43,3 +43,8 @@ tenantId = user.tenantId
 
 #### 删除数据
 删除前，ORM 层会检查数据范围，仅能删除当前用户所属租户的数据。
+
+## 跨租户访问数据方案
+在需要跨租户访问数据的场景下，如运营平台系统或数据分析平台，需要部署独立的系统，该系统本身的配置中，不启用多租户，也即 `enable.multiTenant = false`。
+
+即使数据模型包含 tenantId 字段，也不会受到 ORM 层的多租户限制。此时，数据模型的 tenantId 字段，可以作为跨租户授权的数据范围条件。

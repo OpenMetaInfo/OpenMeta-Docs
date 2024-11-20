@@ -45,3 +45,8 @@ Since the `tenantId` field in the data model is read-only, any attempts to modif
 
 #### Data Deletion
 Before deletion, the ORM layer checks the scope of the data to ensure that only data belonging to the current user's tenant can be deleted.
+
+## Cross-Tenant Data Access Strategy
+In scenarios requiring cross-tenant data access, such as in an operational platform system or a data analytics platform, a separate system should be deployed. In the configuration of this system, multi-tenancy is disabled by setting `enable.multiTenant = false`.
+
+Even if the data model includes a `tenantId` field, it will not be subject to ORM-level multi-tenancy restrictions. In this case, the `tenantId` field in the data model can be used as a condition to authorize the data access scope across tenants.
