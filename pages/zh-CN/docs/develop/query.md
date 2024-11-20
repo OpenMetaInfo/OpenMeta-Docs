@@ -103,7 +103,7 @@ OpenMeta 支持在筛选条件中，进行字段间比较。比如在需要筛�
 
 ### 3.2 Filters 级联查询
 
-在企业级业务系统中，经常会遇到级联查询的场景，OpenMeta 支持通过链式操作符 (.) 连接关系型字段，基于关联模型的数据条件，查询主模型的数据。
+在企业级业务系统中，经常会遇到级联查询的场景，OpenMeta 支持通过链式操作符 `.` 连接关系型字段，基于关联模型的数据条件，查询主模型的数据。
 
 级联查询的定义格式为 `[field1.field2.field3.field4Name, operator, value]`，除末级字段外，字段链上字段类型只能是OneToOne、ManyToOne、OneToMany、ManyToMany类型。可以在全局配置参数中限定最大级联层级。如 `customerId.industryId.name = "互联网"` 表示查询互联网行业客户的订单数据。
 
