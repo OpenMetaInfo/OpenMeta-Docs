@@ -14,7 +14,7 @@
 spring:
   datasource:
     dynamic:
-      enabled: true
+      enable: true
       datasource:
         primary:
           driver-class-name: com.mysql.cj.jdbc.Driver
