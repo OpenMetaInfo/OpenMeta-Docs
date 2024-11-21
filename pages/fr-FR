@@ -1,208 +1,315 @@
-# Model
+# 通用查询条件
 
-在 OpenMeta 中，元数据存在三种形态：DesignTime Metadata、Runtime Metadata、InMemory Metadata，以下是它们的应用场景区分：
+## 1、中缀表达式
 
-（1）DesignTime Metadata：设计时的元数据，使用可视化工具进行编辑、版本化管理和发布管理。
+中缀表达式是最常见的表达式书写方式，特点是运算符位于两个操作数的中间。在日常数学计算和逻辑表达中非常普遍。例如， `1 < 2` 就是一个非常简单的中缀表达式。在计算机领域，几乎所有的高级编程语言，都使用中缀表达式作为算术和逻辑运算的基础，如 `amount > 100` 。
 
-（2）Runtime Metadata：系统运行时所依赖的元数据，同时也是已发布的元数据，存储在业务系统中的 Runtime Metadata 中。
+由于中缀表达式的直观易懂，符合人类的思维习惯，并且可以组合出复杂的逻辑表达式，因此，OpenMeta 采用中缀表达式来构造数据查询条件。
 
-（3）InMemory Metadata：内存中的元数据，主要基于 Runtime Metadata 根据应用场景进行属性筛选、计算和结果缓存。
+中缀表达式非常灵活，既能够表达简单的二元关系，如 `a > b`，又能构建嵌套结构的复杂查询条件，如 `(a > b AND c < d) OR (e = f AND g != h)`。使用中缀表达式时有一个明确的规则，必须使用括号来明确表达不同条件组合的优先级。
 
-这里先介绍 Runtime Metadata 。
+其它运算表达式：
 
-## 1、模型介绍
+**（1）波兰表达式（前缀表达式）**：是一种将运算符置于操作数之前的表示方法，计算顺序从右向左，易于计算机解析和执行，但组合条件的可读性比较差。
 
-模型指的是业务系统中的数据模型，也叫数据对象。数据模型是业务系统中的核心概念，是对业务数据的属性及其关系的抽象定义。通过数据模型，系统能够更好地存储、检索和处理业务数据。
+**（2）逆波兰表达式（后缀表达式）**：与波兰表达式相反，将运算符置于操作数之后，计算顺序从左向右。同样，易于计算机执行计算过程，但是组合条件可读性比较差。
 
-在 OpenMeta 中，每个模型对应一张数据表来存储数据，一般是关系型数据库中的数据表。但 OpenMeta 也支持将模型数据存储在非关系型数据库中。通过模型元数据的 StorageType 属性配置，可以根据应用场景，将模型数据存储在 ElasticSearch 或 OLAP 数据分析存储中。
+## 2、Operator 比较操作符
 
-## 2、模型元数据
+| 序号 | 操作符                         | 代码枚举                                                                                 | 含义                                                                                                         | 备注         |
+| -- | --------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- | ---------- |
+| 1  | =                           | EQUAL                                                                                | 等于                                                                                                         |            |
+| 2  | !=                          | NOT_EQUAL                                                       | 不等于                                                                                                        |            |
+| 3  | >                           | GREATER_THAN                                                    | 大于                                                                                                         |            |
+| 4  | > =                         | GREATER_THAN_OR_EQUAL | 大于等于                                                                                                       |            |
+| 5  | <  | LESS_THAN                                                       | 小于                                                                                                         |            |
+| 6  | <= | LESS_THAN_OR_EQUAL    | 小于等于                                                                                                       |            |
+| 7  | HAS                         | HAS                                                                                  | 包含                                                                                                         | 文本搜索，不支持索引 |
+| 8  | NOT HAS                     | NOT_HAS                                                         | 不包含                                                                                                        | 文本搜索，不支持索引 |
+| 9  | START WITH                  | START_WITH                                                      | 以……开始                                                                                                      | 文本搜索，支持索引  |
+| 10 | NOT START WITH              | NOT_START_WITH                             | 不以......开始 | 文本搜索，支持索引  |
+| 11 | IN                          | IN                                                                                   | 在……中                                                                                                       |            |
+| 12 | NOT IN                      | NOT_IN                                                          | 不在……中                                                                                                      |            |
+| 13 | BETWEEN                     | BETWEEN                                                                              | 在 … 和 … 之间                                                                                                 | 闭区间        |
+| 14 | NOT BETWEEN                 | NOT_BETWEEN                                                     | 不在 … 和 … 之间                                                                                                | 开区间        |
+| 15 | IS SET                      | IS_SET                                                          | 已设置过值                                                                                                      |            |
+| 16 | IS NOT SET                  | IS_NOT_SET                                 | 未设置过值                                                                                                      |            |
+| 17 | PARENT OF                   | PARENT_OF                                                       | 查询所有上级                                                                                                     | 允许多值，支持索引  |
+| 18 | CHILD OF                    | CHILD_OF                                                        | 查询所有下级                                                                                                     | 允许多值，支持索引  |
 
-模型元数据是描述和定义数据模型的数据，也即模型的元信息，包括模型的存储、结构、属性、关系、行为以及其它扩展信息。
+### 2.1 `HAS` 和 `NOT HAS`
 
-> 模型元数据常见属性如下表：
+文本搜索，`HAS` 和 `NOT HAS` 分别对应于 SQL 查询的 `LIKE` 和 `NOT LIKE` 的**模糊匹配**，这两个操作符都不支持索引。
 
-| 序号 | 模型属性           | 数据类型       | 描述         | 默认值      | 备注 |
-| -- | -------------- | ---------- | ---------- | -------- | -- |
-| 1  | labelName      | String     | 模型标签名称     |          | 必填 |
-| 2  | modelName      | String     | 模型的技术名称    |          | 必填 |
-| 3  | softDelete     | Boolean    | 启用软删除      | false    |    |
-| 4  | defaultOrder   | String     | 默认排序规则     |          |    |
-| 5  | displayName    | OptionList | 显示名称（字段列表） |          |    |
-| 6  | searchName     | OptionList | 快捷查询（字段列表） |          |    |
-| 7  | tableName      | String     | 数据库表       |          | 只读 |
-| 8  | timeline       | Boolean    | 是否时间轴模型    | false    |    |
-| 9  | idStrategy     | Option     | 主键生成策略     | DbAutoID |    |
-| 10 | storageType    | Option     | 存储类型       | RDBMS    |    |
-| 11 | versionLock    | Boolean    | 启用乐观锁      | false    |    |
-| 12 | multiTenant    | Boolean    | 多租户控制      | false    |    |
-| 13 | partitionField | String     | 分区字段技术名称   |          |    |
-| 14 | description    | String     | 模型描述       |          |    |
-| 15 | modelFields    | OneToMany  | 模型字段       |          |    |
+### 2.2 `START WITH` 和 `NOT START WITH`
 
-### 2.1、`labelName` 模型标签名称
+`START WITH` 和 `NOT START WITH` 仅用于字符串的搜索匹配，分别对应 SQL查询 `LIKE` 和 `NOT LIKE` 的**前缀匹配**模式。这两个操作符是为了应对大数据量的直接搜索，可以支持数据库索引，在不考虑将数据存储到专用的搜索引擎时使用。
 
-模型的业务名称，如 `产品类别`。
+### 2.3 `IN` 和 `NOT IN`
 
-### 2.2、`modelName` 模型技术名称
+支持多值匹配，Value 是数据集合形式。如 `a IN [1, 2, 3]`
 
-模型技术名称，模型名使用大驼峰命名。如 `ProductCategory`。在生成实体代码的场景中，对应实体类名。
+### 2.4 `BETWEEN` 和 `NOT BETWEEN`
 
-### 2.3、`softDelete` 启用软删除
+`BETWEEN` 是闭区间，Value是一个包含两个元素的数据列表，匹配范围包含左右两个元素本身，如 `a ≤ field ≤ b`。
 
-是否针对该模型，启用数据软删除功能。在业务系统中，需要将被引用的数据模型设置为软删除，以免影响历史数据的关联显示。
+`NOT BETWEEN` 是开区间，匹配范围不包含左右两个元素本身，如 `field < a OR field > b`。
 
-当模型的 `softDelete` 属性被配置为 `true` 时，系统自动给该模型添加 `disabled` 字段，用来表达删除行为实际上是禁用数据。
-该模型数据被删除时，通过更新 `disabled=true` 禁用该数据，被禁用的数据，默认不会出现在关系型字段引用时的搜索结果中，除非在查询条件中，主动增加相关查询条件。
+### 2.5 `IS SET` 和 `IS NOT SET`
 
-注：这里实际上简化了数据软删除和数据禁用两个场景，由于所有被物理删除的数据都会记录在 `ChangeLog` 中，因此将软删除的行为，等同于将数据设置为禁用。
+`IS SET` 表示该字段已经设置过值，等同于 SQL 条件  `IS NOT NULL` 。
 
-### 2.4、`defaultOrder` 默认排序规则
+`IS NOT SET` 表示该字段未设置过值，等同于 SQL 条件  `IS NULL` 。
 
-在分页查询模型数据的场景下，当客户端指定了排序规则时，以客户端指定的排序规则为优先条件。当未指定排序条件时，为了确保在不同场景下，有一个相对一致的排序条件，给模型定义了 defaultOrder 字段，即模型默认采用的排序规则。
+### 2.6 `PARENT OF` 和 `CHILD OF`
 
-如 `name ASC` 表示按照 name 字段值正序排列。支持多个字段使用不同的排序条件，多个排序条件间使用半角逗号间隔，如 `name ASC, amount DESC`，不指定 ASC 或 DESC 排序时，默认采用 ASC 升序排列，即等同于 `name, amount DESC`。
+在树形数据结构中，经常需要递归查询指定节点的所有父级节点，或指定节点的所有子节点，如上下级组织关系等。而且，这里的指定节点，根据业务场景的不同，可能是一个节点，也可能是多个节点。
 
-分页查询模型数据时的排序优先级：
+OpenMeta 为了提高此类场景的查询性能，采用了 `ID 路径查询`  的机制，实现通过一条 SQL 查询出所有父节点或所有子节点。
 
-- （1）客户端指定的排序条件；
+（1）需要进行上下级查询的业务模型，如部门，增加 idPath 字段
 
-- （2）模型默认排序规则；
+（2）转为 id IN split(idPath, '/')
 
-- （3）全局默认排序规则 `id ASC` 。
+（3）等同于 START_WITH ，转为左匹配 (id_path LIKE 'idPath%')
 
-非分页查询不指定默认排序规则。
+## 3、Filters 通用筛选条件
 
-### 2.5、`displayName` 显示名称
+在企业级业务系统中，经常出现复合的筛选条件，如专业用户在客户端通过自定义搜索条件筛选数据，以及服务端根据业务属性组合条件控制数据访问范围，这些场景都需要系统支持动态组合的筛选条件。
 
-> 配置单个或多个字段技术名称，多个字段时技术名称间使用半角逗号间隔。
+OpenMeta 通过定义 Filters 对象，封装常见的数据转换和比较函数，在代码中传递和操作筛选条件。
 
-模型数据的显示名称，应用于 One2One、Many2One 字段的显示名称，及这两种字段下拉搜索时的数据显示名称。支持配置多个字段，字段技术名称间使用半角逗号间隔。
+### 3.1 Filters 结构化查询
 
-如当员工模型的 displayName 配置为 `name, number` 时， One2One、Many2One 字段和下拉搜索员工的场景中，显示为 `员工姓名 / 员工工号`。多个字段的数据之间，使用全局间隔符隔开，示例为 `/`。
+结构化定义的 Filters 分为 Unit、Tree、Empty 三种类型，分别对应最小查询单元、查询结构树、空条件。所有的查询条件使用中缀表达式表示。支持客户端以单个字符串或字符串列表两种形式传递参数，如果是字符串格式，服务端程序将通过 JSON 反序列化字符串为 Filters 对象，如果是字符串列表，则直接调用 Filters 解析函数。
 
-模型数据显示名称的优先级：
+（1）**最小查询单元**
 
-- （1）如果模型配置了 displayName，则优先使用 displayName；
-- （2）如果模型未配置 displayName，但模型包含 name 字段，则使用 name 字段值作为显示名称。
-- （3）如果模型既没有配置 displayName，也不包含 name，则使用 id 作为显示名称。
+Filter的最小查询单元对象为 `FilterUnit`，结构为 `[field, operator, value]` ，即 `[字段名，操作符，比较值]`，如查询名称等于 `Tom` 的用户： `["name", "=", "Tom"]`。
 
-### 2.6、`searchName` 搜索名称
+`FilterUnit` 的操作符 `operator` 对大小写不敏感。具体支持的操作符清单，参考 `Operator 比较操作符` 章节。
 
-> 配置单个或多个字段技术名称，多个字段时技术名称间使用半角逗号间隔。
+（2）**查询结构树**
 
-快捷查询字段，支持在单个搜索条件查找多个字段。如在快捷搜索客户时，支持客户名称、客户编号、联系电话搜索。
+查询结构树，也即多个查询单元的嵌套与组合。如 `[A OR B] AND [C OR D OR [E AND F] OR G]`，其中，每个独立的大写字母，都代表一个 `[field, operator, value]` 结构的最小查询单元 `FilterUnit` 。示例如下：
+`[["name", "=", "Tom"], "OR", ["code", "=", "A100"]], "AND", ["priority", ">", 1]]`
 
-### 2.7、`tableName` 数据表名
+查询结构树支持组合条件的无限嵌套。其中，查询条件之间的逻辑操作符仅接受 `AND` 和 `OR`，对大小写不敏感，未传递逻辑操作符时默认为 AND。如 `[["name", "=", "Tom"], ["priority", ">", 1]]`  的逻辑操作符默认为 `AND`。
 
-只读字段，模型对应的数据库表名，由模型名自动转换，如 `product_category`。
-模型名变化时，默认自动同步修改表名称。可以通过全局 DDL 开关配置关闭自动修改表名，以满足通过其它方式提交 DDL 的场景。
+（3）**字段间比较**
 
-### 2.8、`timeline` 时间轴模型
+OpenMeta 支持在筛选条件中，进行字段间比较。比如在需要筛选 `fieldA > fieldB` 数据的场景 ，可以将 `FilterUnit: [field, operator, value]` 结构的 value属性，替换为保留字段名的占位符  `@{fieldName}` ，如 `["fieldA", ">", "@{FieldB}"]`。
 
-是否对业务数据进行版本化管理的配置属性，当模型配置 `timeline=true` 时，自动添加 sliceId、effectiveStartDate、effectiveEndDate 三个字段。业务处理规则概要如下，详见时间轴设计文档。
+### 3.2 Filters 级联查询
 
-- （1）需要CRUD处理时间轴模型数据时，解析 effectiveDate 参数；
+在企业级业务系统中，经常会遇到级联查询的场景，OpenMeta 支持通过链式操作符 `.` 连接关系型字段，基于关联模型的数据条件，查询主模型的数据。
 
-- （2）支持查询时间在任意时间点移动，支持修改切片、插入切片。
+级联查询的定义格式为 `[field1.field2.field3.field4Name, operator, value]`，除末级字段外，字段链上字段类型只能是OneToOne、ManyToOne、OneToMany、ManyToMany类型。可以在全局配置参数中限定最大级联层级。如 `customerId.industryId.name = "互联网"` 表示查询互联网行业客户的订单数据。
 
-- （3）需要获取跨时间段的时间轴数据时，查询参数中传递 effectiveStartDate 或 effectiveEndDate 条件参数即可。
+OpenMeta 的级联查询，支持 Filters 中包含多个级联条件、多级级联等复合查询条件，也即每一个查询单元 FilterUnit 都可以是级联查询。
 
-### 2.9、`idStrategy` 主键生成策略
+级联查询是一种高级查询技术，它作为系统支持复杂业务需求的补充手段，允许用户执行多层次的数据关联查询。在OneToOne、ManyToOne级联字段查询场景中，服务端会通过多表 join 查询查询数据，如果遇到高频的多层次级联查询场景，应当从模型结构上进行优化，比如在业务表中增加冗余字段，减少级联查询的层级，提升查询的性能。对于大数据量的关联查询场景，考虑使用ES检索引擎。
 
-支持3种主键生成策略：
+### 3.3 XToMany 查询条件
 
-- （1）DbAutoID：数据库自增主键 ID，默认策略。
-- （2）ULID：唯一有序ID，26个字符长度（Base32）, 10个字符时间戳 + 16个字符随机数。
-- （3）TSIDLong：长整数类型的时间有序ID，SnowflakeID 变种。
-- （4）TSIDString：字符串类型的时间有序ID，13个字符长度，SnowflakeID 变种。
-- （5）UUID：程序自动生成的标准 UUID。
-- （6）ExternalId：外部输入 ID
+在 OpenMeta 上下文中，XToMany 代表了 OneToMany、ManyToMany 这两种字段类型，这两种字段类型的数据处理，在很多场景下的具有一定的相似性。
 
-### 2.10、`storageType` 存储类型
+在查询条件中遇到 OneToMany、ManyToMany 字段时，OpenMeta 会先根据 Many 端模型的筛选条件查询数据，将查询结果聚合到主模型的查询条件后，再执行最终的主模型数据查询，也即至少经过两次 SQL 查询。
 
-- （1）RDBMS：关系型数据库存储，适合日常业务数据的增删改查场景，默认存储类型
+OneToMany、ManyToMany 字段的查询条件，跟其它字段类型的逻辑处理稍有不同。当筛选条件操作符为肯定式（即不包含 NOT 类型的操作符），任意一条关联模型的数据命中时，则代表命中关联的主模型数据。否定式子查询（操作符为`NOT EQUAL, NOT HAS, NOT IN`），关联模型的数据都不命中时，才返回关联的主模型数据。
 
-- （2）ES：模型数据存储 ElasticSearch 中，适用于搜索、日志存储等应用场景。
+## 4、Filters 语义化查询
 
-- （3）Doris：OLAP 数据分析场景。
+### 4.1 Filters 语义化查询简介
 
-### 2.11、`versionLock` 启用乐观锁
+在客户端查询场景中，专业用户可以通过定义 `DSL` 查询数据，如 `name = "Tom" OR total > 200` 此时，需要提供尽可能简化、但又保持灵活性不变的 `Filters` 定义方法。OpenMeta 除了支持结构化的查询方法，也支持使用语义化的字符串进行查询。
 
-在对数据一致性要求比较高的业务场景中，启用乐观锁，来避免不同用户同时修改同一条数据导致的冲突。
+- 语义化查询，示例1：
 
-### 2.12、`multiTenant` 多租户控制
+```
+name = "Tom" OR code = "A100"
+```
 
-启用多租户控制前，需要先全局启用多租户配置。然后，对数据模型启用多租户控制时，自动为该模型增加 tenantId 字段，并在数据增删改查过程中，自动对该字段进行赋值，从而实现租户间数据的强制隔离。
+等价于结构化查询:
 
-### 2.13、`partitionField` 分区字段
+```
+[
+    ["name", "=", "Tom"],
+    "OR",
+    ["code", "=", "A100"]
+]
+```
 
-应用于关系型数据库大数据量场景，自动分区规则的字段配置，目前设计中，仅支持设置单个分区字段。
+- 语义化查询，示例2：
 
-### 2.14、`description` 模型描述
+```
+(name = "Tom" OR code = "A100") AND priority > 1
+```
 
-模型的描述信息。
+等价于结构化查询
 
-### 2.15、`modelFields` 模型字段
+```
+[
+    [
+        ["name", "=", "Tom"],
+        "OR",
+        ["code", "=", "A100"]
+    ],
+    "AND",
+    ["priority", ">", 1]
+]
+```
 
-模型的字段列表，详见`字段元数据`。
+在语义化查询中，如果 value 值是字符串类型，仍然需要保留双引号，如果 value 值类型是多个值，需要使用 `[]` 中括号。
 
-## 3、模型定义
+### 4.2 语义化查询的实现
 
-在 OpenMeta 中，将模型的公共属性抽取到了两个基础实体中，分别是 BaseModel 和 TimelineModel。其中 TimelineModel 又是继承自 BaseModel。
+在语义化查询场景，OpenMeta 使用 `ANTLR` 语法解析，将用户输入的语义表达式转换成 `Filters` 对象。其中语法解析规则定义如下：
 
-### 3.1、BaseModel 基础模型父类
+```js
+grammar FilterExpr;
 
-BaseModel 作为一切实体模型的父类，内置 id 主键和审计字段，说明如下：
+expr:   expr AND expr               # AndExpr
+    |   expr OR expr                # OrExpr
+    |   '(' expr ')'                # ParenExpr
+    |   unit                        # UnitExpr
+    ;
 
-| 字段名         | 描述       | 备注     |
-| ----------- | -------- | ------ |
-| id          | 主键 ID    | 支持策略配置 |
-| createdId   | 创建人 ID   | 审计字段   |
-| createdTime | 创建时间     | 审计字段   |
-| updatedId   | 最近更新人 ID | 审计字段   |
-| updatedTime | 最近更新时间   | 审计字段   |
+AND:    'AND';
+OR:     'OR';
 
-普通业务模型，继承自 BaseModel，如：
+unit:   FIELD OPERATOR value        # FilterUnitExpr
+    ;
+
+value: singleValue                  # SingleValueExpr
+     | listValue                    # ListValueExpr
+     ;
+
+singleValue: NUMBER
+           | BOOLEAN
+           | QUOTED_STRING
+           ;
+
+listValue: '[' singleValue (',' singleValue)* ']'
+          ;
+
+FIELD:  [a-z][a-zA-Z0-9]*;
+OPERATOR: '='
+        | '!='
+        | '>'
+        | '>='
+        | '<'
+        | '<='
+        | 'HAS'
+        | 'NOT HAS'
+        | 'START WITH'
+        | 'NOT START WITH'
+        | 'IN'
+        | 'NOT IN'
+        | 'BETWEEN'
+        | 'NOT BETWEEN'
+        | 'IS SET'
+        | 'IS NOT SET'
+        | 'PARENT OF'
+        | 'CHILD OF';
+
+NUMBER: [0-9]+ ('.' [0-9]+)?;
+BOOLEAN: 'true' | 'false';
+QUOTED_STRING: '"' (~["\\] | '\\' .)* '"';  // Double-quoted string, supports escape characters
+
+WS: [ \t\r\n]+ -> skip;                     // Ignore whitespace
+```
+
+语义搜索表达式的 visitor 定义如下：
 
 ```java
-public class UserProfile extends BaseModel {
-		@Schema(description = "Name")
-    private String name;
+public class FilterExprVisitorImpl extends FilterExprBaseVisitor<Filters> {
+    @Override
+    public Filters visitParenExpr(FilterExprParser.ParenExprContext ctx) {
+        return visit(ctx.expr());
+    }
+
+    @Override
+    public Filters visitAndExpr(FilterExprParser.AndExprContext ctx) {
+        Filters left = visit(ctx.expr(0));
+        Filters right = visit(ctx.expr(1));
+        return Filters.merge(LogicOperator.AND, left, right);
+    }
+
+    @Override
+    public Filters visitOrExpr(FilterExprParser.OrExprContext ctx) {
+        Filters left = visit(ctx.expr(0));
+        Filters right = visit(ctx.expr(1));
+        return Filters.merge(LogicOperator.OR, left, right);
+    }
+
+    @Override
+    public Filters visitUnitExpr(FilterExprParser.UnitExprContext ctx) {
+        if (ctx.unit() instanceof FilterExprParser.FilterUnitExprContext unitContext) {
+            String field = unitContext.FIELD().getText();
+            Operator operator = Operator.of(unitContext.OPERATOR().getText());
+            Object value = parseValue(unitContext.value());
+            return Filters.of(field, operator, value);
+        }
+        throw new IllegalArgumentException("Unsupported unit expression: " + ctx.unit().getClass().getName());
+    }
+
+    private Object parseValue(FilterExprParser.ValueContext ctx) {
+        if (ctx instanceof FilterExprParser.SingleValueExprContext singleValueCtx) {
+            FilterExprParser.SingleValueContext singleValue = singleValueCtx.singleValue();
+            return parseSingleValue(singleValue);
+        } else if (ctx instanceof FilterExprParser.ListValueExprContext listValueCtx) {
+            List<Object> list = new ArrayList<>();
+            if (listValueCtx.listValue() instanceof FilterExprParser.ListValueContext valueListContext) {
+                for (FilterExprParser.SingleValueContext valueCtx : valueListContext.singleValue()) {
+                    list.add(parseSingleValue(valueCtx)); // Recursively parse each value in the list
+                }
+            }
+            return list;
+        }
+        throw new IllegalArgumentException("Unsupported value context");
+    }
 }
 ```
 
-### 3.2、TimelineModel 时间轴模型父类
+### 4.3 两种方式的性能比较
 
-所有的时间轴业务模型实体类继承自 TimelineModel 。由于TimelineModel 继承自 BaseModel，因此时间轴业务模型实体自动具备 id、createdId、createdTime、updatedId、updatedTime 这些基础属性。在次之外，时间轴模型还具备以下属性：
+使用 JMH 进行基准测试，1s 内执行 `10,000` 次，分别解析如下查询条件：
 
-| 字段名                | 描述                  |
-| ------------------ | ------------------- |
-| sliceId            | 时间轴切片 ID，也即切片的主键 ID |
-| effectiveStartDate | 有效开始时间              |
-| effectiveEndDate   | 有效结束时间              |
+（1）语义化查询
 
-```java
-public abstract class TimelineModel extends BaseModel {
-}
+```
+((name = "Te st" AND code IN ["A01"]) OR version NOT IN [1]) AND priority != 21
 ```
 
-### 3.3、业务模型定义
+（2）结构化场景
 
-具体的业务模型继承自 `BaseModel` 或 `TimelineModel` ，如 UserProfile 定义：
-
-```java
-@Data
-@Schema(name = "User Profile")
-@EqualsAndHashCode(callSuper = true)
-public class UserProfile extends BaseModel {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
-
-    @Schema(description = "name")
-    private String name;
-}
+```
+[
+    [
+        [
+            ["name", "=", "Te st"],
+            "AND",
+            ["code", "IN", ["A01"]]
+        ],
+        "OR",
+        ["version", "NOT IN", [1]]
+    ],
+    "AND",
+    ["priority","!=",21]
+]
 ```
 
-在自动生成的实体类中，会自动根据模型配置选择父类，不需要开发者手动指定。
+测试结果如下：
+
+![Performance](/image/query_performance.png)
+
+测试结果说明，使用结构化查询解析效率相对较高。因此，OpenMeta 服务端默认使用结构化查询和存储，同时，支持客户端语义化查询。但这并与意味着使用语义化查询效率很低，客户端完全可以从用户体验角度考虑使用语义化查询，或自然语言查询。
+
+### 4.4 基于 AI 的自然语言查询
+
+语义化查询是一种介于自然语言查询与结构化查询之间的方法。在 `AI Agent` 应用场景中，AI 能够利用模型元数据将自然语言查询转换为语义化查询，以执行复杂的数据查询。
+
+为什么不直接将自然语言转换为 `SQL` 语句？在企业级业务系统中，一个查询过程不仅包括用户指定的查询条件，还需考虑用户权限范围、模型的查询约束，以及可能涉及的选项集、用户语言、关联模型数据和动态计算数据等因素。OpenMeta 已经在其语义化查询和结构化查询的底层实现中支持这些场景。
+
+因此，将用户的自然语言转换为系统支持的语义化查询条件，是实现 AI Agent 与业务系统整合的一个有效途径。
