@@ -1,24 +1,25 @@
-# Multi-Datasource Support
+# Multi-DataSource Support
 
-## Use Cases
-* **Read-Write Separation:** Reduces the load on a single database and improves system availability. Applicable to both single-tenant and multi-tenant modes.
-* **Operating Multiple Databases in a Single Project:** Useful when load requirements are not high. However, it cannot be used simultaneously with read-write separation. In distributed systems, this approach increases inter-system coupling and is generally discouraged.
-* **Multi-Tenant Mode with Shared Applications and Independent Databases:** Each tenant uses a separate database, and the datasource is specified in the user's login information.
+## Application Scenarios
+* **Read-Write Separation**: Reduces the load on a single database and improves system availability. This can be applied in both single-tenant and shared-schema multi-tenant modes.
+* **Operating Multiple Databases in the Same Project**: Different datasources can link to different databases. Typically applied in scenarios with low load requirements. In distributed systems, this approach increases system coupling and is generally not recommended.
+* **Shared Application with Independent Databases for Multi-Tenant Mode**: Each tenant uses an independent database, and the datasource is specified in the user's login information.
 
-### Multi-Datasource Configuration
-Enable the multi-datasource configuration switch with: `spring.datasource.dynamic.enable = true`.
+**Note**: To reduce application complexity, it is recommended to choose an appropriate architecture based on load requirements. Only one of the above scenarios can be enabled at a time.
 
-If this is not enabled, even if multiple datasources are configured, the system will fall back to the original single-datasource configuration defined under `spring.datasource.*`.
+## Multi-DataSource Configuration
+Enable the multi-datasource configuration switch: `spring.datasource.dynamic.enable = true`.
 
-The first datasource in the configuration list serves as the default datasource. If a datasource is not explicitly specified using the `@DataSource` annotation, the default datasource is used. Datasource keys, which correspond to datasource names, can be customized in the `application.yml` file:
+If not enabled, regardless of multiple datasource configurations, the system will still use the original `spring.datasource.*` as a single datasource configuration.
 
+The first datasource in the configuration list will act as the default datasource. If no datasource is specified via the `@DataSource` annotation, the default datasource will be used. You can customize the keys for datasources in the `application.yml` file, where the keys represent the names of the datasources.
 ```yml
 spring:
   datasource:
     dynamic:
       enable: true
       datasource:
-        primary:
+        default:
           driver-class-name: com.mysql.cj.jdbc.Driver
           url: jdbc:mysql://localhost:3306/demo
           username: user0
@@ -35,9 +36,8 @@ spring:
           password: pass2
 ```
 
-### Specifying a Datasource in Java Code
-Use the `@DataSource("db1")` annotation to specify the name of the datasource, which corresponds to a key in the configuration file:
-
+### Specifying a DataSource in Java Code
+Use the `@DataSource("db1")` annotation to specify the name of the datasource, corresponding to the key in the configuration file.
 ```java
 @DataSource("db1")
 public void method1() {
@@ -45,17 +45,48 @@ public void method1() {
 }
 ```
 
-#### Datasource Propagation Rules for `@DataSource`:
-* If a method lacks a `@DataSource` annotation, the class-level annotation is applied.
-* If a datasource is already specified in the execution chain and matches the current datasource, no switching occurs.
-* If a datasource is already specified in the execution chain but differs from the current datasource, an exception is thrown—cross-datasource operations are not allowed.
-* If no datasource is specified in the execution chain, the current datasource is applied.
-* When a datasource is accessed for the first time, the setting is removed after the method execution ends.
+Datasource propagation mechanism with the `@DataSource()` annotation:
+* If a method lacks the `@DataSource()` annotation, the class-level annotation is applied.
+* If a datasource is already specified in the chain and matches the current datasource, no switching occurs.
+* If a datasource is already specified in the chain and differs from the current datasource, an exception is thrown, as cross-data-source operations are not allowed.
+* If no datasource is specified in the chain, the current specified datasource is used.
+* When accessing a datasource for the first time, the specification is cleared after the method execution completes.
 
-### Handling Consistency Issues in Read-After-Write
-In read-write separation scenarios outside transactional contexts, issues may arise where data is written to the primary database but read from the replica due to synchronization delays, leading to stale data.
+## Read-Write Separation
+Enable read-write separation by setting `spring.datasource.dynamic.read-write-separation=true`.
 
-**Solution:** Add a `@DataSource` annotation to the read method and specify the primary database:
+In a multi-datasource configuration, the first datasource is treated as the primary (write) database, and others as read-only databases. The routing rules are as follows:
+* **Transactional Operations**: Access the primary database.
+* **Non-transactional Write Operations**: Access the primary database.
+* **Non-transactional Read Operations**: Access a read-only database by default. If a datasource is specified, access the specified datasource.
+```yml
+spring:
+  datasource:
+    dynamic:
+      enable: true
+      read-write-separation: true
+      datasource:
+        primary:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/demo
+          username: user0
+          password: pass0
+        read1:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/db1
+          username: user1
+          password: pass1
+        read2:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/db2
+          username: user2
+          password: pass2
+```
+
+### Handling Write-Read Consistency Issues
+In scenarios with read-write separation and non-transactional contexts, issues may arise when reading after writing. Specifically, data written to the primary database may not yet be synchronized with the read-only database, resulting in stale data being read.
+
+The solution is to add the `@DataSource` annotation to the read method, specifying access to the primary database.
 ```java
 // When 'primary' is the write datasource.
 @DataSource("primary")
@@ -64,7 +95,33 @@ public void readMethod1() {
 }
 ```
 
-### Multi-Tenant Mode with Shared Applications and Independent Databases
-During user login, specify both `tenantId` and `datasourceKey` in the `ContextInterceptor` implementation class.
+## Shared Application with Independent Databases for Multi-Tenant Mode
+When a user logs in, both `tenantId` and `datasourceKey` can be specified in the implementation class of the `ContextInterceptor` interceptor.
+```yml
+system:
+  multi-tenancy:
+    enable: true
+    isolated-database: true
+spring:
+  datasource:
+    dynamic:
+      enable: true
+      datasource:
+        tenant1:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/demo
+          username: user0
+          password: pass0
+        tenant2:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/db1
+          username: user1
+          password: pass1
+        tenant3:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/db2
+          username: user2
+          password: pass2
+```
 
-For detailed configuration, refer to [Multi-Tenancy](./tenant).
+For more information on multi-tenancy, refer to [Multi-Tenancy](./tenant).
