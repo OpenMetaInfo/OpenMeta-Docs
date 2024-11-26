@@ -1,4 +1,4 @@
-# 多租户
+# 多租户支持
 ## 多租户介绍
 
 OpenMeta 原生支持共享表结构的多租户。启用多租户后，自动根据租户隔离数据。
@@ -12,6 +12,7 @@ system:
   multi-tenancy:
     enable: true
 ```
+
 ### 共享应用、独立数据库模式
 由于 OpenMeta 本身支持 [动态多数据源](./datasource)，且 UserInfo 对象包含 tenantId 和 datasourceKey 两个字段。
 
@@ -23,6 +24,26 @@ system:
   multi-tenancy:
     enable: true
     isolated-database: true
+spring:
+  datasource:
+    dynamic:
+      enable: true
+      datasource:
+        tenant1:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/demo
+          username: user0
+          password: pass0
+        tenant2:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/db1
+          username: user1
+          password: pass1
+        tenant3:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/db2
+          username: user2
+          password: pass2
 ```
 
 ## 多租户数据模型
