@@ -1,26 +1,107 @@
 # 快速入门
+本章节介绍如何在本地快速启动相关应用程序。
 
 ## 1、拉取代码仓库
 ```bash
 git clone https://github.com/OpenMetaInfo/OpenMeta.git
 ```
+快速启动所需的文件在 `./deploy` 目录下。
 
-## 2、运行 Demo 应用
+## 2、运行最小化应用 mini-app
+mini-app 是一个仅依赖 web 模块的最小应用，可以验证通用接口能力，通过通用接口访问系统元数据。
+
 ### 2.1 方式一：Docker Compose 运行
+```bash
+docker-compose -f deploy/mini-app/docker-compose.yml up -d
+```
+
+### 2.2、方式二：源码运行 mini-app 应用
+* （1）使用 IDE 加载 Maven 模块。
+* （2）配置 application-dev.yml 文件中的 Redis 和数据库连接信息。
+* （3）在 MySQL 数据库执行 ./deploy/mini-app/init_mysql 中的 SQL 脚本。
+* （3）配置 Profile 为 dev，并运行 mini-app 应用的主程序。
+
+### 2.3、调用 OpenAPI 接口
+mini-app 应用的 API 路径：`/api/mini`
+#### 2.3.1 查看接口文档
+mini-app 应用的 Swagger 接口文档地址：
+
+[http://localhost/api/mini/swagger-ui/index.html](http://localhost/api/mini/swagger-ui/index.html)
+
+#### 2.3.2 导入 OpenAPI 接口
+本地服务启动后，可以将 OpenAPI 接口文档导入到 ApiFox 等接口工具，mini-app 应用的 OpenAPI 接口文档地址为：
+
+http://localhost/api/mini/v3/api-docs
+
+#### 2.3.3 通过 curl 命令调用
+```bash
+curl -X POST 'http://localhost/api/mini/SysField/searchPage' \
+-H 'Content-Type: application/json' \
+-d '{}'
+```
+
+## 3、运行 demo-app 应用
+demo-app 是一个实验性应用，依赖了开发过程中新增的 starters，用来验证新增的功能特性。因此，准备工作也会复杂一些。
+
+由于 Demo 应用依赖了 ElasticSearch 和 RocketMQ，需要先运行这两个服务，或者连接到已有的 ElasticSearch 和 RocketMQ 测试环境。
+
+### 3.1 运行 ElasticSearch 和 RocketMQ
+如果已经有 ElasticSearch 和 RocketMQ 测试环境，可以跳过运行步骤，直接创建 ES index 和消息 Topics。
+
+#### 3.1.1 Docker Compose 运行 ElasticSearch
+```bash
+docker-compose -f deploy/efk/docker-compose.yml up -d
+```
+Kibana 客户端访问地址： http://localhost:5601
+
+#### 3.1.2 Docker Compose 运行 RocketMQ
+```bash
+docker-compose -f deploy/rocketmq/docker-compose.yml up -d
+```
+RocketMQ 客户端访问地址： http://localhost:8080
+
+### 3.2 Docker Compose 运行 Demo 应用
+#### 3.2.1 配置环境变量
+如果连接到已有的 ElasticSearch 和 RocketMQ，修改 `deploy/demo-app/docker-compose.yml` 中的 `demo-app` 的环境变量。
+```yml
+  demo-app:
+    image: openmeta/demo-app:0.7.3
+    ports:
+      - 80:80
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/demo?useUnicode=true&characterEncoding=utf-8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=GMT%2B8
+      - SPRING_DATA_REDIS_HOST=redis
+      - ROCKETMQ_NAME_SERVER=localhost:9876
+      - SPRING_ELASTICSEARCH_CLUSTER=http://localhost:9200
+      - SPRING_ELASTICSEARCH_USERNAME=your_username
+      - SPRING_ELASTICSEARCH_PASSWORD=your_password
+      - SPRING_ELASTICSEARCH_INDEX_CHANGELOG=demo_dev_changelog
+    depends_on:
+      - redis
+      - mysql
+```
+
+#### 3.2.2 Docker Compose 运行 Demo 应用
 ```bash
 docker-compose -f deploy/demo-app/docker-compose.yml up -d
 ```
 
-## 2.2、方式二：源码运行 Demo 应用
-* （1）使用 IDE 加载 Maven 模块。
-* （2）配置 application-dev.yml 文件中的 Redis、Database 连接信息。
-* （3）在 MySQL 数据库执行 ./deploy/demo-app/init_mysql 中的 SQL 脚本。
-* （3）配置 Profile 为 dev，并运行 demo-app 应用的主程序。
+### 3.3、调用 OpenAPI 接口
+demo-app 应用的 API 路径：`/api/demo`
+#### 3.3.1 查看接口文档
+Demo 应用的 Swagger 接口文档地址：
 
-## 4、调用 API 接口
-通过 API 工具，如 ApiFox 或 Postman，调用接口进行测试。
+[http://localhost/api/demo/swagger-ui/index.html](http://localhost/api/demo/swagger-ui/index.html)
+
+#### 3.3.2 导入 OpenAPI 接口
+本地服务启动后，可以将 OpenAPI 接口文档导入到 ApiFox 等接口工具，Demo 应用的 OpenAPI 接口文档地址为：
+
+http://localhost/api/demo/v3/api-docs
+
+#### 3.3.3 通过 curl 命令调用
 ```bash
-curl -X POST 'http://localhost/api/demo/SysModel/searchPage' \
+curl -X POST 'http://localhost/api/demo/SysField/searchPage' \
 -H 'Content-Type: application/json' \
 -d '{}'
 ```
