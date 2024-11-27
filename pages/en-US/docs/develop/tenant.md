@@ -1,24 +1,26 @@
 # Multi-Tenancy Support
 
-## Introduction to Multi-Tenancy
+## 1. Introduction to Multi-Tenancy
+Multi-tenancy is a software architecture pattern that allows multiple tenants to share a single system instance while ensuring data isolation between tenants. This enables resource reuse, unified upgrades and maintenance, standardized data analysis, and large-scale promotion.
 
-OpenMeta natively supports multi-tenancy with shared table structures. Once multi-tenancy is enabled, data is automatically isolated based on tenants.
-![Multi tenancy](/image/multi-tenancy.png)
+OpenMeta natively supports multi-tenancy with shared table structures. Once multi-tenancy is enabled, data is automatically isolated by tenant.
 
-## Enabling Multi-Tenancy
+![Multi-tenancy](/image/multi-tenancy.png)
 
-### Shared Application and Shared Database Mode
-Enable multi-tenancy in the configuration file by setting `system.multi-tenancy.enable`. Example:
+## 2. Enabling Multi-Tenancy
+
+### 2.1 Shared Application, Shared Database Mode
+Enable multi-tenancy by setting `system.multi-tenancy.enable` in the configuration file. For example:
 ```yaml
 system:
   multi-tenancy:
     enable: true
 ```
 
-### Shared Application and Independent Database Mode
-Since OpenMeta supports [Dynamic Multi-Data Sources](./datasource), the `UserInfo` object includes `tenantId` and `datasourceKey` fields.
+### 2.2 Shared Application, Separate Database Mode
+Since OpenMeta supports [dynamic multi-data sources](./datasource), the `UserInfo` object includes `tenantId` and `datasourceKey` fields.
 
-When a user logs in, these two fields can be assigned values in the implementation class of the `ContextInterceptor` interceptor.
+When a user logs in, these fields can be populated in the `ContextInterceptor` interceptor implementation.
 
 Enable multi-tenancy and database isolation in the configuration file:
 ```yaml
@@ -48,41 +50,47 @@ spring:
           password: pass2
 ```
 
-## Multi-Tenant Data Model
-When multi-tenancy is enabled, you can configure data isolation at the model level.
-Conditions for enabling tenant data isolation in a model:
-* The model metadata must set `multiTenant = true`. The `multiTenant` attribute determines which data models are isolated by tenants. Models with `multiTenant = false` can be shared across tenants.
-* Add a `tenantId` field to the model. This field is globally read-only. During data creation, it is populated with the current user's tenant and cannot be modified.
+## 3. Multi-Tenancy Data Model
+Once multi-tenancy is enabled, data isolation can be configured at the model level.
 
-## Tenant Data Isolation Mechanism
-Once multi-tenancy is enabled, the ORM layer enforces isolation and validation. The current user's tenant ID (denoted as `user.tenantId`) is recorded in the context.
+**Conditions for Enabling Tenant Isolation in Models**:
+- Set the model metadata `multiTenant = true`. This `multiTenant` attribute controls which data models are subject to tenant isolation. Models with `multiTenant = false` can be shared across tenants.
+- Add a `tenantId` field to the model. This field is globally read-only and is populated with the `tenantId` of the current user upon creation. Modifying this field is not allowed.
 
-### Simple Queries
-The ORM layer automatically appends tenant filtering conditions to the `WHERE` clause:
+## 4. Data Isolation Strategies Between Tenants
+Once multi-tenancy is enabled, the ORM enforces strict isolation and validation. The current user's `tenantId` is recorded in the context (`user.tenantId`).
+
+### 4.1 Simple Queries
+The ORM automatically appends a tenant filter condition to the `WHERE` clause:
 ```sql
 tenant_id = user.tenantId
 ```
 
-### JOIN Queries
-Both the main table and associated tables are automatically appended with tenant filtering conditions. No additional developer intervention is required:
+### 4.2 JOIN Queries
+The tenant filter condition is automatically appended to both the main table and the related tables without requiring developer intervention:
 ```sql
 t0.tenant_id = user.tenantId AND t1.tenant_id = user.tenantId
 ```
 
-### Data Creation
-When creating data, the ORM layer automatically populates the `tenantId` field:
+### 4.3 Data Creation
+During data creation, the ORM automatically populates the `tenantId` field:
 ```java
 tenantId = user.tenantId
 ```
-If the client-provided data specifies a `tenantId` that differs from the current user's `tenantId`, an exception is thrown, highlighting a potential unauthorized access attempt.
 
-### Data Updates
-As the `tenantId` of the data model is a read-only field, the ORM layer ignores any attempts to modify it.
+If the client specifies a `tenantId` that differs from the current user's `tenantId`, the system will throw an exception, indicating a potential unauthorized access attempt.
 
-### Data Deletion
-Before deletion, the ORM layer verifies the data's scope, ensuring only data belonging to the current user's tenant can be deleted.
+### 4.4 Data Updates
+Since the `tenantId` field in the data model is read-only, the ORM ignores any attempts to modify the `tenantId`.
 
-## Cross-Tenant Data Access
-For scenarios requiring cross-tenant data access, such as operational platforms or data analytics systems, a separate system should be deployed. This system’s configuration must not enable multi-tenancy (`system.multi-tenancy.enable = false`).
+### 4.5 Data Deletion
+Before deletion, the ORM checks the data scope, ensuring that only data belonging to the current user's tenant can be deleted.
 
-Even if the data model includes a `tenantId` field, it will not be subject to ORM-level multi-tenancy restrictions. In such cases, the `tenantId` field can be used as a filter condition for cross-tenant data authorization.
+## 5. Multi-Tenant System Operations Platform
+Operating a multi-tenant system requires cross-tenant data access for tenant management, data configuration, and analysis.
+
+### 5.1 Operations Platform Without Tenant Isolation
+The operations platform should deploy separate front-end and back-end services with a unique access domain. In this system, multi-tenancy should not be enabled, i.e., `system.multi-tenancy.enable = false`.
+
+### 5.2 Tenant Properties in the Operations Platform
+In the operations platform, tenants are treated as an attribute of data authorization. The `tenantId` field in data models serves only as a cross-tenant data authorization condition. Even if the data model includes a `tenantId` field, it is not subject to multi-tenancy restrictions enforced by the ORM layer.
