@@ -1,4 +1,4 @@
-# 多租户
+# 多租户支持
 
 ## 多租户介绍
 
@@ -30,6 +30,26 @@ system:
   multi-tenancy:
     enable: true
     isolated-database: true
+spring:
+  datasource:
+    dynamic:
+      enable: true
+      datasource:
+        tenant1:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/demo
+          username: user0
+          password: pass0
+        tenant2:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/db1
+          username: user1
+          password: pass1
+        tenant3:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/db2
+          username: user2
+          password: pass2
 ```
 
 ## 多租户数据模型
