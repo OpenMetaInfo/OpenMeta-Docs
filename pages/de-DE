@@ -1,116 +1,33 @@
-# 多数据源支持
+# 多租户支持
 
-## 应用场景
+## 1 多租户介绍
 
-- 读写分离：降低单个数据库的负载，提高系统的可用性。单租户模式、共享Schema的多租户模式皆可使用。
-- 同一个项目内，操作多个数据库：不同数据源可以连接不同数据库。一般用于对负载要求不高的场景。在分布式系统中，该操作会增加系统间耦合性，不建议使用。
-- 共享应用、独立数据库的多租户模式：每个租户使用独立的数据库，在用户登录信息中，指定数据源。
+多租户是一种软件架构模式，允许多个租户（Tenant）共享同一个系统实例，同时又能确保租户间数据隔离，从而实现资源复用、统一升级维护、标准化数据分析，以及规模化推广。
 
-注意：为降低应用复杂度，鼓励根据负载情况选择合适的架构，以上场景，只能启用其中之一，不能同时启用。
+OpenMeta 原生支持共享表结构的多租户。启用多租户后，自动根据租户隔离数据。
+![Multi tenancy](/image/multi-tenancy.png)
 
-## 多数据源配置
+## 2 启用多租户
 
-启用多数据源的配置开关：`spring.datasource.dynamic.enable = true`。
+### 2.1 共享应用、共享数据库模式
 
-否则，无论是否配置了多个数据源，仍然以原先的 `spring.datasource.*` 作为单数据源配置。
+在配置文件中设置 `system.multi-tenancy.enable` 启用多租户。如：
 
-多数据源配置列表的第一个数据源，将作为默认数据源。未通过 `@DataSource` 注解指定数据源时，都访问默认数据源。可以在 `application.yml` 文件中自定义数据源的 key，该 key 也即数据源的名称。
-
-```yml
-spring:
-  datasource:
-    dynamic:
-      enable: true
-      datasource:
-        default:
-          driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/demo
-          username: user0
-          password: pass0
-        db1:
-          driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/db1
-          username: user1
-          password: pass1
-        db2:
-          driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/db2
-          username: user2
-          password: pass2
+```yaml
+system:
+  multi-tenancy:
+    enable: true
 ```
 
-### 在 Java 代码中指定数据源
+### 2.2 共享应用、独立数据库模式
 
-通过 `@DataSource("db1")` 注解指定数据源的名称，也即配置文件中对应的 key。
+由于 OpenMeta 本身支持 [动态多数据源](./datasource)，且 UserInfo 对象包含 tenantId 和 datasourceKey 两个字段。
 
-```java
-@DataSource("db1")
-public void method1() {
-    // ...
-}
-```
+当用户登录时，在 ContextInterceptor 拦截器的实现类中，给这两个字段赋值即可。
 
-通过 `@DataSource()` 注解的数据源传播机制:
+在配置文件中启用多租户和数据库隔离：
 
-- 方法没有 `@DataSource()` 注解时，获取类上的该注解。
-- 如果链路中已经指定了数据源，且与当前数据源相同，则不切换。
-- 如果链路中已经指定了数据源，且与当前数据源不相同，抛出异常，也即不允许跨数据源操作。
-- 如果链路中没有指定数据源，则使用当前指定的数据源。
-- 当首次指定访问某数据源时，方法执行结束后，会删除该设定。
-
-## 读写分离
-
-通过设置 `spring.datasource.dynamic.read-write-separation=true`，即启用读写分离。
-
-以多数据源配置中，第一个数据源作为主库，其它数据源作为只读库。路由规则：
-
-- 事务操作：访问主库。
-- 非事务的写操作：访问主库。
-- 非事务的读操作：默认访问从库，指定 DataSource 时，访问指定数据源。
-
-```yml
-spring:
-  datasource:
-    dynamic:
-      enable: true
-      read-write-separation: true
-      datasource:
-        primary:
-          driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/demo
-          username: user0
-          password: pass0
-        read1:
-          driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/db1
-          username: user1
-          password: pass1
-        read2:
-          driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/db2
-          username: user2
-          password: pass2
-```
-
-### 处理写后读的一致性问题
-
-在读写分离的场景下，且非事务上下文中，会发生写后读的问题。也即写数据到主库，立即非事务性读取数据时，会路由到从库进行读取，但由于数据同步存在延迟，导致读到从库中的脏数据。
-
-解决方案是在该读方法上，添加 `@DataSource` 注解，指定访问主库。
-
-```java
-// When 'primary' is the write datasource.
-@DataSource("primary")
-public void readMethod1() {
-    // ...
-}
-```
-
-## 共享应用、独立数据库的多租户模式
-
-当用户登录时，在 ContextInterceptor 拦截器的实现类中，同时指定 tenantId 和 datasourceKey 即可。
-
-```yml
+```yaml
 system:
   multi-tenancy:
     enable: true
@@ -137,4 +54,62 @@ spring:
           password: pass2
 ```
 
-多租户的其它介绍内容，请参考 [多租户](./tenant)
+## 3 多租户数据模型
+
+启用多租户后，可以从模型级别设置是否进行租户数据隔离。
+
+**模型启用多租户隔离的条件**：
+
+- 模型元数据设置 `multiTenant = true`，通过`multiTenant`属性控制哪些数据模型进行多租户隔离，也即`multiTenant = false`的模型可以在租户间共享。
+
+- 给模型添加 `tenantId` 字段。该字段属性全局表现为只读，创建时根据当前用户的所属租户，填充`tenantId`字段值，且不允许修改。
+
+## 4 租户间数据隔离方案
+
+启用多租户后，ORM 会进行强制隔离和校验，且上下文 Context 中记录了当前用户的 tenantId（下文用 `user.tenantId` 表示）。
+
+### 4.1 简单查询
+
+ORM 层强制在 WHERE 条件中追加租户过滤条件：
+
+```sql
+tenant_id = user.tenantId
+```
+
+### 4.2 JOIN 查询
+
+主表和关联表都会被自动追加租户过滤条件，无需开发人员代码干预。
+
+```sql
+t0.tenant_id = user.tenantId  AND t1.tenant_id = user.tenantId
+```
+
+### 4.3 创建数据
+
+创建数据时，ORM 层自动填充 `tenantId` 字段值：
+
+```java
+tenantId = user.tenantId
+```
+
+如果客户端传递的数据指定了 tenantId，且值与当前用户的 tenantId 不相同，程序会抛出异常，需要关注可能发生的越权尝试事件。
+
+### 4.4 更新数据
+
+由于数据模型的 tenantID 是只读字段，ORM 层会自动忽略对 tenantId 的修改。
+
+### 4.5 删除数据
+
+删除前，ORM 层会检查数据范围，仅能删除当前用户所属租户的数据。
+
+## 5 多租户系统的运营平台
+
+在运营多租户系统时，需要跨租户访问数据，进行租户授权、数据配置、数据分析等操作。
+
+### 5.1 运营平台不启用多租户隔离
+
+运营平台需要部署独立的前后端服务，具备独立的访问域名。该系统本身的配置中，不启用多租户，也即 `system.multi-tenancy.enable = false`。
+
+### 5.2 运营平台的租户属性
+
+在运营平台中，租户只是数据授权属性中的一种。也即，数据模型的 tenantId 字段，仅仅作为跨租户授权的数据范围条件。即使数据模型包含 tenantId 字段，也不会受到 ORM 层的多租户限制。
