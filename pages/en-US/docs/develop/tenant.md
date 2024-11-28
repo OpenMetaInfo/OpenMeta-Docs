@@ -3,13 +3,12 @@
 ## 1. Introduction to Multi-Tenancy
 Multi-tenancy is a software architecture pattern that allows multiple tenants to share a single system instance while ensuring data isolation between tenants. This enables resource reuse, unified upgrades and maintenance, standardized data analysis, and large-scale promotion.
 
-OpenMeta natively supports multi-tenancy with shared table structures. Once multi-tenancy is enabled, data is automatically isolated by tenant.
-
+OpenMeta natively supports two multi-tenancy modes: shared application with shared database mode, and shared application with independent database mode. Once multi-tenancy is enabled, data is automatically isolated by tenant.
 ![Multi-tenancy](/image/multi-tenancy-en.png)
 
 ## 2. Enabling Multi-Tenancy
 
-### 2.1 Shared Application, Shared Database Mode
+### 2.1 Multi-Tenancy Mode 1: Shared Application with Shared Database
 Enable multi-tenancy by setting `system.multi-tenancy.enable` in the configuration file. For example:
 ```yaml
 system:
@@ -17,7 +16,7 @@ system:
     enable: true
 ```
 
-### 2.2 Shared Application, Separate Database Mode
+### 2.2 Multi-Tenancy Mode 2: Shared Application with Independent Database
 Since OpenMeta supports [dynamic multi-data sources](./datasource), the `UserInfo` object includes `tenantId` and `datasourceKey` fields.
 
 When a user logs in, these fields can be populated in the `ContextInterceptor` interceptor implementation.
