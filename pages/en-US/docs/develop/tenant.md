@@ -5,7 +5,7 @@ Multi-tenancy is a software architecture pattern that allows multiple tenants to
 
 OpenMeta natively supports multi-tenancy with shared table structures. Once multi-tenancy is enabled, data is automatically isolated by tenant.
 
-![Multi-tenancy](/image/multi-tenancy.png)
+![Multi-tenancy](/image/multi-tenancy-en.png)
 
 ## 2. Enabling Multi-Tenancy
 
