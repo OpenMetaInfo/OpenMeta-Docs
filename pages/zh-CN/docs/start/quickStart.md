@@ -43,10 +43,10 @@ curl -X POST 'http://localhost/api/mini/SysField/searchPage' \
 ## 3、运行 demo-app 应用
 demo-app 是一个实验性应用，依赖了开发过程中新增的 starters，用来验证新增的功能特性。因此，准备工作也会复杂一些。
 
-由于 Demo 应用依赖了 ElasticSearch 和 RocketMQ，需要先运行这两个服务，或者连接到已有的 ElasticSearch 和 RocketMQ 测试环境。
+由于 Demo 应用依赖了 ElasticSearch、RocketMQ、OSS，需要先运行这些服务，或者连接到已有的测试环境。
 
-### 3.1 运行 ElasticSearch 和 RocketMQ
-如果已经有 ElasticSearch 和 RocketMQ 测试环境，可以跳过运行步骤，直接创建 ES index 和消息 Topics。
+### 3.1 运行服务依赖
+如果已经有 ElasticSearch、RocketMQ、OSS 测试环境，可以跳过运行步骤，直接创建 ES index 、消息 Topics 和 OSS Bucket。
 
 #### 3.1.1 Docker Compose 运行 ElasticSearch
 ```bash
@@ -60,23 +60,38 @@ docker-compose -f deploy/rocketmq/docker-compose.yml up -d
 ```
 RocketMQ 客户端访问地址： http://localhost:8080
 
+#### 3.1.3 Docker Compose 运行 OSS（Minio）
+OpenMeta 的 OSS 存储，支持 Minio 和 阿里云 OSS 服务。在测试过程中，为了减少外部依赖，通过运行单机 Minio 服务提供 OSS 服务。
+```bash
+docker-compose -f deploy/minio/docker-compose.yml up -d
+```
+* OSS API 地址： http://localhost:9000
+* 管理界面地址 http://localhost:9001
+* Root 用户名: minioadmin
+* Root 密码: minioadmin
+
 ### 3.2 Docker Compose 运行 Demo 应用
 #### 3.2.1 配置环境变量
-如果连接到已有的 ElasticSearch 和 RocketMQ，修改 `deploy/demo-app/docker-compose.yml` 中的 `demo-app` 的环境变量。
+如果连接到已有的 ElasticSearch、RocketMQ 和 OSS，修改 `deploy/demo-app/docker-compose.yml` 中的 `demo-app` 服务的环境变量，指定相关的服务地址。
 ```yml
   demo-app:
-    image: openmeta/demo-app:0.7.3
+    image: openmeta/demo-app:0.7.5
     ports:
       - 80:80
     environment:
       - SPRING_PROFILES_ACTIVE=dev
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/demo?useUnicode=true&characterEncoding=utf-8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=GMT%2B8
       - SPRING_DATA_REDIS_HOST=redis
-      - ROCKETMQ_NAME_SERVER=localhost:9876
-      - SPRING_ELASTICSEARCH_CLUSTER=http://localhost:9200
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/demo?useUnicode=true&characterEncoding=utf-8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=GMT%2B8
+      - ROCKETMQ_NAME_SERVER=host.docker.internal:9876
+      - SPRING_ELASTICSEARCH_CLUSTER=http://host.docker.internal:9200
       - SPRING_ELASTICSEARCH_USERNAME=your_username
       - SPRING_ELASTICSEARCH_PASSWORD=your_password
       - SPRING_ELASTICSEARCH_INDEX_CHANGELOG=demo_dev_changelog
+      - OSS_TYPE=minio
+      - OSS_ENDPOINT=http://host.docker.internal:9000
+      - OSS_ACCESS_KEY=minioadmin
+      - OSS_SECRET_KEY=minioadmin
+      - OSS_BUCKET=demo-app
     depends_on:
       - redis
       - mysql
