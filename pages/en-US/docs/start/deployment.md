@@ -29,7 +29,7 @@ In the parameters:
 
 Example for building the demo application image:
 ```bash
-./deploy/build.sh apps/demo-app 0.7.3
+./deploy/build.sh apps/demo-app 0.7.5
 ```
 
 ## 2. Launch the Demo Application Using Docker Compose

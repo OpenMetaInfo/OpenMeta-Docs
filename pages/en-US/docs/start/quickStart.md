@@ -42,10 +42,10 @@ curl -X POST 'http://localhost/api/mini/SysField/searchPage' \
 ## 3. Run the demo-app Application
 The demo-app is an experimental application that relies on newly added starters developed during the process. It is used to verify new feature capabilities and thus requires more preparation.
 
-Since the demo application depends on ElasticSearch and RocketMQ, these services must be running first, or it must connect to an existing ElasticSearch and RocketMQ testing environment.
+Since the demo application depends on ElasticSearch, RocketMQ and OSS, these services must be running first, or it must connect to an existing testing environment.
 
 ### 3.1 Run ElasticSearch and RocketMQ
-If there is an existing ElasticSearch and RocketMQ testing environment, you can skip these steps and directly create the necessary ES indices and message topics.
+If there is an existing ElasticSearch, RocketMQ and OSS testing environment, you can skip these steps and directly create the necessary ES indices and message topics.
 
 #### 3.1.1 Run ElasticSearch with Docker Compose
 ```bash
@@ -59,23 +59,41 @@ docker-compose -f deploy/rocketmq/docker-compose.yml up -d
 ```
 RocketMQ client access: [http://localhost:8080](http://localhost:8080)
 
+#### 3.1.3 Running OSS (Minio) with Docker Compose
+
+The OSS storage for OpenMeta supports both Minio and Alibaba Cloud OSS services. During testing, to reduce external dependencies, a standalone Minio service is used to provide OSS functionality.
+
+```bash
+docker-compose -f deploy/minio/docker-compose.yml up -d
+```
+
+- Minio API endpoint: [http://localhost:9000](http://localhost:9000)
+- Web UI Dashboard: [http://localhost:9001](http://localhost:9001)
+- Root user: `minioadmin`
+- Root password: `minioadmin`
+
 ### 3.2 Run the Demo Application with Docker Compose
 #### 3.2.1 Configure Environment Variables
-If connecting to an existing ElasticSearch and RocketMQ, modify the environment variables of `demo-app` in `deploy/demo-app/docker-compose.yml`.
+If connecting to an existing ElasticSearch, RocketMQ and OSS, modify the environment variables of `demo-app` in `deploy/demo-app/docker-compose.yml`.
 ```yaml
   demo-app:
-    image: openmeta/demo-app:0.7.3
+    image: openmeta/demo-app:0.7.5
     ports:
       - 80:80
     environment:
       - SPRING_PROFILES_ACTIVE=dev
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/demo?useUnicode=true&characterEncoding=utf-8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=GMT%2B8
       - SPRING_DATA_REDIS_HOST=redis
-      - ROCKETMQ_NAME_SERVER=localhost:9876
-      - SPRING_ELASTICSEARCH_CLUSTER=http://localhost:9200
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/demo?useUnicode=true&characterEncoding=utf-8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=GMT%2B8
+      - ROCKETMQ_NAME_SERVER=host.docker.internal:9876
+      - SPRING_ELASTICSEARCH_CLUSTER=http://host.docker.internal:9200
       - SPRING_ELASTICSEARCH_USERNAME=your_username
       - SPRING_ELASTICSEARCH_PASSWORD=your_password
       - SPRING_ELASTICSEARCH_INDEX_CHANGELOG=demo_dev_changelog
+      - OSS_TYPE=minio
+      - OSS_ENDPOINT=http://host.docker.internal:9000
+      - OSS_ACCESS_KEY=minioadmin
+      - OSS_SECRET_KEY=minioadmin
+      - OSS_BUCKET=demo-app
     depends_on:
       - redis
       - mysql

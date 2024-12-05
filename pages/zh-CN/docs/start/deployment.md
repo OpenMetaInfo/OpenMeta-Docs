@@ -25,7 +25,7 @@ docker buildx ls
 
 构建 Demo 应用的镜像示例：
 ```bash
-./deploy/build.sh apps/demo-app 0.7.3
+./deploy/build.sh apps/demo-app 0.7.5
 ```
 
 ## 2 通过 Docker Compose 启动 Demo 应用
