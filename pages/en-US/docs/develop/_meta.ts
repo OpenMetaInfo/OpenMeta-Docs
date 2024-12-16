@@ -1,4 +1,5 @@
 export default {
+  newApp: "Create New App",
   api: "Common API",
   orm: "ORM",
   query: "Query Conditions",
