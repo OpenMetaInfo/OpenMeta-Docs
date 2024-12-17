@@ -128,8 +128,10 @@ spring:
           password: pass2
 ```
 
-## Shared Application with Independent Databases for Multi-Tenant Mode
-When a user logs in, both `tenantId` and `datasourceKey` can be specified in the implementation class of the `ContextInterceptor` interceptor.
+## Shared Application - Isolated Database Multi-Tenant Mode
+Enable both multi-tenancy and multi-data sources, and set the multi-data source `mode` to `multi-tenancy-isolated`.
+
+In the implementation of the `ContextInterceptor` (which loads user information), specify both the `tenantId` and the `datasourceKey`.
 ```yml
 system:
   multi-tenancy:
