@@ -1,16 +1,19 @@
 # Multi-DataSource Support
 
-## Application Scenarios
-* **Read-Write Separation**: Reduces the load on a single database and improves system availability. This can be applied in both single-tenant and shared-schema multi-tenant modes.
-* **Operating Multiple Databases in the Same Project**: Different datasources can link to different databases. Typically applied in scenarios with low load requirements. In distributed systems, this approach increases system coupling and is generally not recommended.
-* **Shared Application with Independent Databases for Multi-Tenant Mode**: Each tenant uses an independent database, and the datasource is specified in the user's login information.
+## Four Application Modes of Multi-DataSource
+OpenMeta's dynamic multi-data source supports four different application modes:
+1. `Read-Write Separation (read-write-separation)`: Used to reduce the load on a single database and improve system availability. This can be used in both single-tenant and shared database multi-tenant modes.
+2. `Auto-Switch by Model (switch-by-model)`: Within the same project, access multiple databases while retaining all metadata-driven capabilities. You can configure the data source `key` at the model metadata level, so different models access different databases.
+3. `Shared Application - Isolated Database Multi-Tenant Mode (multi-tenancy-isolated)`: Each tenant uses an isolated database, and the data source is specified in the user login information.
+4. `General Multi-DataSource (multi-datasource)`: In the same project, switch between different data sources only when needed using the `@DataSource` annotation. Other modes also support the use of `@DataSource`.
 
-**Note**: To reduce application complexity, it is recommended to choose an appropriate architecture based on load requirements. Only one of the above scenarios can be enabled at a time.
+Recommendation: To reduce coupling between systems, it is encouraged to design appropriate architecture based on load conditions. Modes like `switch-by-model` and `multi-datasource` should only be used in low-complexity, low-load systems.
 
 ## Multi-DataSource Configuration
-Enable the multi-datasource configuration switch: `spring.datasource.dynamic.enable = true`.
+First, enable the multi-data source configuration switch: `spring.datasource.dynamic.enable=true`.
+Otherwise, regardless of whether multiple data sources are configured, it will still use the original `spring.datasource.*` as the single data source configuration.
 
-If not enabled, regardless of multiple datasource configurations, the system will still use the original `spring.datasource.*` as a single datasource configuration.
+Then, optionally configure the dynamic multi-data source application mode through `spring.datasource.dynamic.mode`. If `mode` is not configured, `multi-datasource` will be used as the default mode.
 
 The first datasource in the configuration list will act as the default datasource. If no datasource is specified via the `@DataSource` annotation, the default datasource will be used. You can customize the keys for datasources in the `application.yml` file, where the keys represent the names of the datasources.
 ```yml
@@ -18,6 +21,7 @@ spring:
   datasource:
     dynamic:
       enable: true
+      # mode: read-write-separation, switch-by-model, multi-tenancy-isolated, multi-datasource(default)
       datasource:
         default:
           driver-class-name: com.mysql.cj.jdbc.Driver
@@ -53,7 +57,7 @@ Datasource propagation mechanism with the `@DataSource()` annotation:
 * When accessing a datasource for the first time, the specification is cleared after the method execution completes.
 
 ## Read-Write Separation
-Enable read-write separation by setting `spring.datasource.dynamic.read-write-separation=true`.
+Enable read-write separation by setting `spring.datasource.dynamic.mode=read-write-separation`.
 
 In a multi-datasource configuration, the first datasource is treated as the primary (write) database, and others as read-only databases. The routing rules are as follows:
 * **Transactional Operations**: Access the primary database.
@@ -64,7 +68,7 @@ spring:
   datasource:
     dynamic:
       enable: true
-      read-write-separation: true
+      mode: read-write-separation
       datasource:
         primary:
           driver-class-name: com.mysql.cj.jdbc.Driver
@@ -95,17 +99,46 @@ public void readMethod1() {
 }
 ```
 
+## Switch Data Source by Model
+First, set the multi-data source `mode` to `switch-by-model`.
+
+Then, in the business model metadata, set the `dataSource` property with the data source `key`.
+Note: System-level models (with the `systemModel` property set to `true`, such as models starting with `Sys`) cannot configure the `dataSource` property.
+```yml
+spring:
+  datasource:
+    dynamic:
+      enable: true
+      mode: switch-by-model
+      datasource:
+        default:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/demo
+          username: user0
+          password: pass0
+        db1:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/db1
+          username: user1
+          password: pass1
+        db2:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/db2
+          username: user2
+          password: pass2
+```
+
 ## Shared Application with Independent Databases for Multi-Tenant Mode
 When a user logs in, both `tenantId` and `datasourceKey` can be specified in the implementation class of the `ContextInterceptor` interceptor.
 ```yml
 system:
   multi-tenancy:
     enable: true
-    isolated-database: true
 spring:
   datasource:
     dynamic:
       enable: true
+      mode: multi-tenancy-isolated
       datasource:
         tenant1:
           driver-class-name: com.mysql.cj.jdbc.Driver

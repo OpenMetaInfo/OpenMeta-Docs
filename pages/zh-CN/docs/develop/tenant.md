@@ -7,7 +7,7 @@ OpenMeta 原生支持两种多租户模式：共享应用-共享数据库模式�
 
 ## 2 启用多租户
 ### 2.1 多租户模式一：共享应用-共享数据库
-在配置文件中设置 `system.multi-tenancy.enable` 启用多租户。如：
+在配置文件中设置 `system.multi-tenancy.enable=true` 启用多租户。如：
 ```yaml
 system:
   multi-tenancy:
@@ -19,16 +19,17 @@ system:
 
 当用户登录时，在 ContextInterceptor 拦截器的实现类中，给这两个字段赋值即可。
 
-在配置文件中启用多租户和数据库隔离：
+在配置文件中启用多租户 `system.multi-tenancy.enable=true`，同时启用动态多数据源，并且设置 `mode` 为 `multi-tenancy-isolated`。
 ```yaml
 system:
   multi-tenancy:
     enable: true
-    isolated-database: true
 spring:
   datasource:
     dynamic:
       enable: true
+      # mode: read-write-separation, switch-by-model, multi-tenancy-isolated, multi-datasource(default)
+      mode: multi-tenancy-isolated
       datasource:
         tenant1:
           driver-class-name: com.mysql.cj.jdbc.Driver

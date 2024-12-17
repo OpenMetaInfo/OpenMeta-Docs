@@ -9,7 +9,7 @@ OpenMeta natively supports two multi-tenancy modes: shared application with shar
 ## 2. Enabling Multi-Tenancy
 
 ### 2.1 Multi-Tenancy Mode 1: Shared Application with Shared Database
-Enable multi-tenancy by setting `system.multi-tenancy.enable` in the configuration file. For example:
+Enable multi-tenancy by setting `system.multi-tenancy.enable=true` in the configuration file. For example:
 ```yaml
 system:
   multi-tenancy:
@@ -21,16 +21,17 @@ Since OpenMeta supports [dynamic multi-data sources](./datasource), the `UserInf
 
 When a user logs in, these fields can be populated in the `ContextInterceptor` interceptor implementation.
 
-Enable multi-tenancy and database isolation in the configuration file:
+Enable multi-tenancy in the configuration file by setting `system.multi-tenancy.enable=true`, and also enable dynamic multi-data source with the `mode` set to `multi-tenancy-isolated`.
 ```yaml
 system:
   multi-tenancy:
     enable: true
-    isolated-database: true
 spring:
   datasource:
     dynamic:
       enable: true
+      # mode: read-write-separation, switch-by-model, multi-tenancy-isolated, multi-datasource(default)
+      mode: multi-tenancy-isolated
       datasource:
         tenant1:
           driver-class-name: com.mysql.cj.jdbc.Driver

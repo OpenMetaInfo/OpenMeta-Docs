@@ -74,7 +74,7 @@ docker-compose -f deploy/minio/docker-compose.yml up -d
 
 ### 3.2 Run the Demo Application with Docker Compose
 #### 3.2.1 Configure Environment Variables
-If connecting to an existing ElasticSearch, RocketMQ and OSS, modify the environment variables of `demo-app` in `deploy/demo-app/docker-compose.yml`.
+If connecting to an existing ElasticSearch, RocketMQ and OSS, modify the environment variables of `demo-app` in `deploy/demo-app/docker-compose.yml`.`ROCKETMQ_NAME_SERVER` requires the IP address of the RocketMQ server.
 ```yaml
   demo-app:
     image: openmeta/demo-app:0.7.5

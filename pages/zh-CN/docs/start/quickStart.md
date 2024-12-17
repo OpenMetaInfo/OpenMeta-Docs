@@ -72,7 +72,7 @@ docker-compose -f deploy/minio/docker-compose.yml up -d
 
 ### 3.2 Docker Compose 运行 Demo 应用
 #### 3.2.1 配置环境变量
-如果连接到已有的 ElasticSearch、RocketMQ 和 OSS，修改 `deploy/demo-app/docker-compose.yml` 中的 `demo-app` 服务的环境变量，指定相关的服务地址。
+如果连接到已有的 ElasticSearch、RocketMQ 和 OSS，修改 `deploy/demo-app/docker-compose.yml` 中的 `demo-app` 服务的环境变量，指定相关的服务地址。其中 `ROCKETMQ_NAME_SERVER` 需要配置 RocketMQ 服务的 IP 地址。
 ```yml
   demo-app:
     image: openmeta/demo-app:0.7.5
@@ -82,7 +82,7 @@ docker-compose -f deploy/minio/docker-compose.yml up -d
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/demo?useUnicode=true&characterEncoding=utf-8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=GMT%2B8
-      - ROCKETMQ_NAME_SERVER=host.docker.internal:9876
+      - ROCKETMQ_NAME_SERVER=xxxx:9876
       - SPRING_ELASTICSEARCH_CLUSTER=http://host.docker.internal:9200
       - SPRING_ELASTICSEARCH_USERNAME=your_username
       - SPRING_ELASTICSEARCH_PASSWORD=your_password
