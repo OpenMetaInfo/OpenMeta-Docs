@@ -226,14 +226,14 @@ public class FilterExprVisitorImpl extends FilterExprBaseVisitor<Filters> {
     public Filters visitAndExpr(FilterExprParser.AndExprContext ctx) {
         Filters left = visit(ctx.expr(0));
         Filters right = visit(ctx.expr(1));
-        return Filters.merge(LogicOperator.AND, left, right);
+        return Filters.and(left, right);
     }
 
     @Override
     public Filters visitOrExpr(FilterExprParser.OrExprContext ctx) {
         Filters left = visit(ctx.expr(0));
         Filters right = visit(ctx.expr(1));
-        return Filters.merge(LogicOperator.OR, left, right);
+        return Filters.or(left, right);
     }
 
     @Override
