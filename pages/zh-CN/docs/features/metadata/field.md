@@ -31,12 +31,10 @@
 | 21 | relatedModel | String | 关联模型 | 关系属性 |
 | 22 | relatedField | String | 关联字段 | 关系属性 |
 | 23 | inverseLinkField | String | 反向连接字段 | 关系属性 |
-| 24 | autoBindMany | Boolean | 自动绑定 Many 端，默认 `false` | 关系属性 |
-| 25 | autoExpandMany | Boolean | 自动展开 Many 端，默认 `false` | 关系属性 |
-| 26 | displayName | MultiString | 关系型字段显示名称 | 关系属性 |
-| 27 | filters | String | 关系型字段过滤条件 | 关系属性 |
-| 28 | columnName | String | 数据表列名 | 只读 |
-| 29 | description | String | 字段描述 |  |
+| 24 | displayName | MultiString | 关系型字段显示名称 | 关系属性 |
+| 25 | filters | String | 关系型字段过滤条件 | 关系属性 |
+| 26 | columnName | String | 数据表列名 | 只读 |
+| 27 | description | String | 字段描述 |  |
 
 ### 2.1 `labelName` 字段标签
 
@@ -172,31 +170,23 @@ OpenMeta 引用了 **[AviatorScript](https://github.com/killme2008/aviatorscript
 
 当字段类型为 `ManyToMany` 时，中间表关联到目标表的字段名。
 
-### 2.24 `autoBindMany` 自动绑定 Many 端
-
-针对 `OneToMany/ManyToMany` 类型的字段，当客户端查询数据，且未指定要读取的字段时，是否自动绑定读取当前 `OneToMany/ManyToMany` 类型的字段，默认为 `false`。这里自动绑定的前提条件是，系统配置中开启了 `未指定字段时自动加载模型字段` 。
-
-### 2.25 `autoExpandMany` 自动展开 Many 端
-
-针对 `ManyToMany` 类型的字段，在返回值中，是否自动加载关联模型的默认字段，默认为 `false`， 返回 `[ [id,displayName] …]` 数据列表。
-
-### 2.26 `displayName` 关系型字段显示名称
+### 2.24 `displayName` 关系型字段显示名称
 
 针对 `OneToOne、ManyToOne、ManyToMany、OneToMany` 关系型字段设置字段级别的 `displayName` 属性，配置关联模型数据的显示名称。
 
 当关系型字段本身未配置 `displayName` 属性时，则使用关联模型的 `displayName` 配置。
 
-### 2.27 `filters` 关系型字段过滤条件
+### 2.25 `filters` 关系型字段过滤条件
 
 针对 `OneToOne、ManyToOne` 关系型字段的基础筛选条件，用于根据业务场景对可选数据进行过滤，客户端在执行查询时可携带的固定筛选条件，与用户搜索条件是 `AND` 关系。
 
-### 2.28 `columnName` 数据表列名
+### 2.26 `columnName` 数据表列名
 
 只读字段，字段对应的数据表列名，由字段名自动转换，如 `unit_price`。
 
 字段名变化时，默认同步修改数据表列名。可以通过全局 DDL 开关配置关闭自动修改数据表，以满足通过其它方式提交 DDL 的场景。
 
-### 2.29 `description` 字段描述
+### 2.27 `description` 字段描述
 
 字段的业务描述。
 

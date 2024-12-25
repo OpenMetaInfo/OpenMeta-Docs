@@ -31,12 +31,10 @@ Field metadata is a collection of descriptive information about model fields. It
 | 21 | relatedModel | String | Related model | Relationship attribute |
 | 22 | relatedField | String | Related field | Relationship attribute |
 | 23 | inverseLinkField | String | Inverse link field | Relationship attribute |
-| 24 | autoBindMany | Boolean | Auto-bind Many side, default `false` | Relationship attribute |
-| 25 | autoExpandMany | Boolean | Auto-expand Many side, default `false` | Relationship attribute |
-| 26 | displayName | MultiString | Display name for relational fields | Relationship attribute |
-| 27 | filters | String | Filtering conditions for relational fields | Relationship attribute |
-| 28 | columnName | String | Data table column name | Read-only |
-| 29 | description | String | Field description |  |
+| 24 | displayName | MultiString | Display name for relational fields | Relationship attribute |
+| 25 | filters | String | Filtering conditions for relational fields | Relationship attribute |
+| 26 | columnName | String | Data table column name | Read-only |
+| 27 | description | String | Field description |  |
 
 ### 2.1 `labelName` Field Label
 
@@ -170,31 +168,23 @@ When the field type is OneToMany or ManyToMany, the field in the related model t
 
 When the field type is ManyToMany, the field name in the target table that is linked to the middle table.
 
-### 2.24 `autoBindMany` Auto-bind Many Side
-
-For fields of types OneToMany/ManyToMany, when clients query data without specifying fields to retrieve, whether to automatically bind the retrieval of the current OneToMany/ManyToMany type field. Default is `false`. The prerequisite for automatic binding is that the system configuration enables "Automatically load model fields when fields are not specified."
-
-### 2.25 `autoExpandMany` Auto-expand Many Side
-
-For fields of type ManyToMany, whether to automatically load the default fields of the related model in the returned value. Default is `false`, returning `[ [id, displayName] ... ]` data list.
-
-### 2.26 `displayName` Display Name for Relational Fields
+### 2.24 `displayName` Display Name for Relational Fields
 
 Set the field-level `displayName` property for OneToOne, ManyToOne, ManyToMany, OneToMany relational fields to configure the display name of the related model data.
 
 If not configured at the relational fields, it uses the `displayName` configuration of the related model.
 
-### 2.27 `filters` Filtering Conditions for Relational Fields
+### 2.25 `filters` Filtering Conditions for Relational Fields
 
 Basic filtering conditions for OneToOne, ManyToOne relational fields, used to filter optional data based on business scenarios. When executing queries, clients can carry fixed filtering conditions along with user search conditions; the relationship is an `AND` relationship.
 
-### 2.28 `columnName` Data Table Column Name
+### 2.26 `columnName` Data Table Column Name
 
 Read-only field, the data table column name corresponding to the field, automatically converted from the field name, such as `unit_price`.
 
 When the field name changes, the data table column name is synchronized by default. The automatic modification of the data table can be turned off through the global DDL switch to meet the scenario of submitting DDL in other ways.
 
-### 2.29 `description` Field Description
+### 2.27 `description` Field Description
 
 The business description of the field.
 

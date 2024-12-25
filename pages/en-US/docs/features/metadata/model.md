@@ -28,17 +28,19 @@ Model metadata describes and defines the data model, including the storage, stru
 | 2 | modelName | String | Model technical name |  | Required |
 | 3 | softDelete | Boolean | Enable soft delete | false |  |
 | 4 | defaultOrder | String | Default sorting rule |  |  |
-| 5 | displayName | OptionList | Display name (field list) |  |  |
-| 6 | searchName | OptionList | Quick search (field list) |  |  |
+| 5 | displayName | MultiString | Display name (field list) |  |  |
+| 6 | searchName | MultiString | Quick search (field list) |  |  |
 | 7 | tableName | String | Database table |  | Read-only |
 | 8 | timeline | Boolean | Is a timeline model | false |  |
 | 9 | idStrategy | Option | Primary key generation strategy | DbAutoID |  |
 | 10 | storageType | Option | Storage type | RDBMS |  |
 | 11 | versionLock | Boolean | Enable optimistic locking | false |  |
 | 12 | multiTenant | Boolean | Enable multi-tenant control | false |  |
-| 13 | partitionField | String | Partition field technical name |  |  |
-| 14 | description | String | Model description |  |  |
-| 15 | modelFields | OneToMany | Model fields |  |  |
+| 13 | dataSource | String | Data source key |  | Model-level multi-data-source |
+| 14 | businessKey | MultiString | Business Key (Field List) |  |  |
+| 15 | partitionField | String | Partition field technical name |  |  |
+| 16 | description | String | Model description |  |  |
+| 17 | modelFields | OneToMany | Model fields |  |  |
 
 ### 2.1 `labelName` Model Label Name
 
@@ -124,16 +126,29 @@ In business scenarios where data consistency requirements are high, enabling opt
 
 Before enabling multi-tenant control, the global multi-tenant configuration needs to be enabled. Then, when enabling multi-tenant control for data models, the model is automatically added with a `tenantId` field. During data CRUD operations, this field is automatically assigned a value, achieving enforced isolation of data between tenants.
 
-### 2.13 `partitionField` Partition Field
-Designed for use in large-scale relational database scenarios, the configuration of fields for automatic partitioning currently supports only the setting of a single partitioning field.
+### 2.13 `dataSource` Data Source Key
 
-### 2.14 `description` Model Description
+When enabling multi-data-source configuration at the model level, you can optionally specify the data source key for the model, indicating which data source the model data is stored in.
 
-Model description information.
+If the data source key is not specified, the model data will be stored in the default data source. For details, refer to [Multi-Data Source](../../develop/datasource).
 
-### 2.15、`modelFields` Model Fields
+### 2.14 `businessKey` Business Key
 
-A list of fields for the model, see `Field Metadata`.
+In addition to the model's primary key ID field, you can specify a business key for the model to uniquely identify model data. The business key can be a single field or a combination of multiple fields.
+
+At the code level, you can use the business key to retrieve, update, or delete data.
+
+### 2.15 `partitionField` Partition Field
+
+This applies to scenarios involving relational databases with large volumes of data. It specifies the field configuration for automatic partitioning rules. Currently, only a single partition field is supported.
+
+### 2.16 `description` Model Description
+
+Description information for the model.
+
+### 2.17 `modelFields` Model Fields
+
+A list of the model's fields. For more details, see `Field Metadata`.
 
 ## 3. Model Definition
 

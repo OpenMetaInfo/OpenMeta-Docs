@@ -24,8 +24,8 @@ Other types of expression notation:
 | 4 | >= | GREATER_THAN_OR_EQUAL | Greater than or equal to | |
 | 5 | < | LESS_THAN | Less than | |
 | 6 | <= | LESS_THAN_OR_EQUAL | Less than or equal to | |
-| 7 | HAS | HAS | Contains | Text search, does not support indexing |
-| 8 | NOT HAS | NOT_HAS | Does not contain | Text search, does not support indexing |
+| 7 | CONTAINS | CONTAINS | Contains | Text search, does not support indexing |
+| 8 | NOT CONTAINS | NOT_CONTAINS | Does not contain | Text search, does not support indexing |
 | 9 | START WITH | START_WITH | Starts with | Text search, supports indexing |
 | 10 | NOT START WITH | NOT_START_WITH | Does not start with | Text search, supports indexing |
 | 11 | IN | IN | In | |
@@ -37,9 +37,9 @@ Other types of expression notation:
 | 17 | PARENT OF | PARENT_OF | Queries all ancestors | Allows multiple values, supports indexing |
 | 18 | CHILD OF | CHILD_OF | Queries all descendants | Allows multiple values, supports indexing |
 
-### 2.1 `HAS` and `NOT HAS`
+### 2.1 `CONTAINS` and `NOT CONTAINS`
 
-Text search, `HAS` and `NOT HAS`, correspond to SQL queries' `LIKE` and `NOT LIKE` **fuzzy matching**. Neither operator supports indexing.
+`CONTAINS` and `NOT CONTAINS`, are equivalent to `LIKE` and `NOT LIKE` in SQL, and used for text search matching. Neither operator supports indexing.
 
 ### 2.2 `START WITH` and `NOT START WITH`
 
@@ -103,7 +103,7 @@ In the context of OpenMeta, XToMany represents the field types OneToMany and Man
 
 When encountering OneToMany or ManyToMany fields in query conditions, OpenMeta first queries data based on the filtering conditions of the Many-side model. The query results are then aggregated into the main model's query conditions before executing the final query on the main model's data, which means at least two SQL queries are performed.
 
-The query conditions for OneToMany and ManyToMany fields differ slightly from the logical processing of other field types. When the filtering condition operator is affirmative (i.e., not containing NOT-type operators), if any data in the associated model matches, it indicates that the associated main model data is matched. For negative subQueries (operators like `NOT EQUAL, NOT HAS, NOT IN`), the associated main model data is returned only if none of the associated model's data matches.
+The query conditions for OneToMany and ManyToMany fields differ slightly from the logical processing of other field types. When the filtering condition operator is affirmative (i.e., not containing NOT-type operators), if any data in the associated model matches, it indicates that the associated main model data is matched. For negative subQueries (operators like `NOT EQUAL, NOT CONTAINS, NOT IN`), the associated main model data is returned only if none of the associated model's data matches.
 
 ## 4. Filters Semantic Query
 ### 4.1 Introduction to Filters Semantic Query
@@ -178,8 +178,8 @@ OPERATOR: '='
         | '>='
         | '<'
         | '<='
-        | 'HAS'
-        | 'NOT HAS'
+        | 'LIKE'
+        | 'NOT LIKE'
         | 'START WITH'
         | 'NOT START WITH'
         | 'IN'

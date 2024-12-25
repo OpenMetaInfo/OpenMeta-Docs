@@ -29,17 +29,19 @@
 | 2 | modelName | String | 模型的技术名称 |  | 必填 |
 | 3 | softDelete | Boolean | 启用软删除 | false |  |
 | 4 | defaultOrder | String | 默认排序规则 |  |  |
-| 5 | displayName | OptionList | 显示名称（字段列表） |  |  |
-| 6 | searchName | OptionList | 快捷查询（字段列表） |  |  |
+| 5 | displayName | MultiString | 显示名称（字段列表） |  |  |
+| 6 | searchName | MultiString | 快捷查询（字段列表） |  |  |
 | 7 | tableName | String | 数据库表 |  | 只读 |
 | 8 | timeline | Boolean | 是否时间轴模型 | false |  |
 | 9 | idStrategy | Option | 主键生成策略 | DbAutoID |  |
 | 10 | storageType | Option | 存储类型 | RDBMS |  |
 | 11 | versionLock | Boolean | 启用乐观锁 | false |  |
 | 12 | multiTenant | Boolean | 多租户控制 | false |  |
-| 13 | partitionField | String | 分区字段技术名称 |  |  |
-| 14 | description | String | 模型描述 |  |  |
-| 15 | modelFields | OneToMany | 模型字段 |  |  |
+| 13 | dataSource | String | 数据源Key |  | 模型级多数据源 |
+| 14 | businessKey | MultiString | 业务主键（字段列表） |  |  |
+| 15 | partitionField | String | 分区字段技术名称 |  |  |
+| 16 | description | String | 模型描述 |  |  |
+| 17 | modelFields | OneToMany | 模型字段 |  |  |
 
 ### 2.1、`labelName` 模型标签名称
 
@@ -132,15 +134,26 @@
 
 启用多租户控制前，需要先全局启用多租户配置。然后，对数据模型启用多租户控制时，自动为该模型增加 tenantId 字段，并在数据增删改查过程中，自动对该字段进行赋值，从而实现租户间数据的强制隔离。
 
-### 2.13、`partitionField` 分区字段
+### 2.13、`dataSource` 数据源Key
+
+当启用模型级多数据源配置时，可以选择性指定模型的数据源Key，用于指定模型数据存储在哪个数据源中。
+
+当未指定数据源Key时，模型数据存储在默认数据源中。具体参考 [多数据源](../../develop/datasource)。
+
+### 2.14、`businessKey` 业务主键
+除了模型主键 ID 字段外，还可以指定模型的业务主键，用于唯一标识模型数据。业务主键可以是单个字段，也可以是多个字段的组合。
+
+在代码层面，可以根据业务主键查找数据、更新数据和删除数据。
+
+### 2.15、`partitionField` 分区字段
 
 应用于关系型数据库大数据量场景，自动分区规则的字段配置，目前设计中，仅支持设置单个分区字段。
 
-### 2.14、`description` 模型描述
+### 2.16、`description` 模型描述
 
 模型的描述信息。
 
-### 2.15、`modelFields` 模型字段
+### 2.17、`modelFields` 模型字段
 
 模型的字段列表，详见`字段元数据`。
 
