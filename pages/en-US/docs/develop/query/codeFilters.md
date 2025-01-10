@@ -48,6 +48,13 @@ SubQueries subQueries = new SubQueries().expand(Department::getEmployees)
 Department dept = this.getById(id, subQueries);
 ```
 
+Other examples:
+```java
+// When retrieving the import template, also retrieve the list of import fields under that template
+SubQueries subQueries = new SubQueries().expand(ImportTemplate::getImportFields);
+ImportTemplate importTemplate = importTemplateService.getById(templateId, subQueries);
+```
+
 ## 2. Filters Object Construction
 Using the Job model in an online recruitment system as an example, which includes several simple attributes:
 ```java
