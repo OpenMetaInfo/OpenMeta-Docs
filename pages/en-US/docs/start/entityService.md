@@ -10,338 +10,417 @@ For more details, refer to the [Query Conditions](develop/query) sections.
 ## 2. FlexQuery
 
 ## 3. `EntityService` interface methods
-
-### Create One Row Data
+### createOne
 ```java
 /**
- * Create a single data object and return the id.
+ * Creates a new entity and returns its ID.
  *
- * @param object data object to be created
- * @return id
+ * @param entity the entity to be created
+ * @return the ID of the newly created entity
  */
-K createOne(T object);
+K createOne(T entity);
 ```
-### Create One Row And Return
+
+### createOneAndFetch
 ```java
 /**
-  * Create a single data object, return the object with id and other latest field values
-  *
-  * @param object data object to be created
-  * @return object with id and other latest field values.
-  */
-T createOneAndReturn(T object);
+ * Creates a new entity and returns the created entity with any auto-generated fields populated.
+ *
+ * @param entity the entity to be created
+ * @return the newly created entity
+ */
+T createOneAndFetch(T entity);
 ```
-### Create List
+
+### createList
 ```java
 /**
-  * Create multiple data objects and return the id list.
-  *
-  * @param objects data object list to be created
-  * @return id list
-  */
-List<K> createList(List<T> objects);
+ * Creates multiple entities at once and returns a list of their IDs.
+ *
+ * @param entities the list of entities to be created
+ * @return a list of IDs for the created entities
+ */
+List<K> createList(List<T> entities);
 ```
-### Create List And Return
+
+### createListAndFetch
 ```java
 /**
-  * Create multiple data objects, return the object list with id and other latest field values.
-  *
-  * @param objects data object list to be created
-  * @return object list, each object with id and other latest field values.
-  */
-List<T> createListAndReturn(List<T> objects);
+ * Creates multiple entities at once and returns them with any auto-generated fields populated.
+ *
+ * @param entities the list of entities to be created
+ * @return a list of the newly created entities
+ */
+List<T> createListAndFetch(List<T> entities);
 ```
-### Read One Row Data
+
+### getById (single-parameter)
 ```java
 /**
-  * Read one data object by id.
-  * The ManyToOne/OneToOne/Option/MultiOption fields are original values.
-  *
-  * @param id data id
-  * @return data object
-  */
-T readOne(K id);
+ * Get an entity by id.
+ * The ManyToOne/OneToOne/Option/MultiOption fields are original values.
+ *
+ * @param id the id of the entity to get
+ * @return an Optional object containing the entity if found, or empty if not found
+ */
+Optional<T> getById(K id);
 ```
-### Read One With Specified Fields
+
+### getById (with SubQueries)
 ```java
 /**
-  * Read one data object by id.
-  * If the fields is not specified, all accessible fields as the default.
-  * The ManyToOne/OneToOne/Option/MultiOption fields are original values.
-  *
-  * @param id data id
-  * @param fields field list to read
-  * @return data object
-  */
-T readOne(K id, Collection<String> fields);
+ * Get an entity by id, with subQueries to expand relational fields.
+ * The ManyToOne/OneToOne/Option/MultiOption fields are original values.
+ *
+ * @param id the id of the entity to get
+ * @param subQueries subQueries object, used to expand relational fields
+ * @return an Optional object containing the entity if found, or empty if not found
+ */
+Optional<T> getById(K id, SubQueries subQueries);
 ```
-### Read List
+
+### getById (with fields)
 ```java
 /**
-  * Read multiple data objects by ids.
-  * The ManyToOne/OneToOne/Option/MultiOption fields are original values.
-  *
-  * @param ids data ids list
-  * @return data object list
-  */
-List<T> readList(List<K> ids);
+ * Get an entity by id, with specified fields to read.
+ * If the fields is not specified, all accessible fields as the default.
+ * The ManyToOne/OneToOne/Option/MultiOption fields are original values.
+ *
+ * @param id the id of the entity to get
+ * @param fields field list to read
+ * @return an Optional object containing the entity if found, or empty if not found
+ */
+Optional<T> getById(K id, Collection<String> fields);
 ```
-### Read List
+
+### getByIds (list of IDs)
 ```java
 /**
-  * Read multiple data objects by ids.
-  * If the fields is not specified, all accessible fields as the default.
-  * The ManyToOne/OneToOne/Option/MultiOption fields are original values.
-  *
-  * @param ids data ids list
-  * @param fields field list to read
-  * @return data object list
-  */
-List<T> readList(List<K> ids, Collection<String> fields);
+ * Get multiple entities by ids.
+ * The ManyToOne/OneToOne/Option/MultiOption fields are original values.
+ *
+ * @param ids a list of ids to get
+ * @return a list of entities
+ */
+List<T> getByIds(List<K> ids);
 ```
-### Update One Row
+
+### getByIds (with SubQueries)
 ```java
 /**
-  * Update one data object by its ID. Null values are not ignored.
-  *
-  * @param object the data object to update
-  * @return true / Exception
-  */
-boolean updateOne(T object);
+ * Get multiple entities by ids.
+ * The ManyToOne/OneToOne/Option/MultiOption fields are original values.
+ *
+ * @param ids data ids list
+ * @param subQueries subQueries object, can expand relational fields
+ * @return a list of entities
+ */
+List<T> getByIds(List<K> ids, SubQueries subQueries);
 ```
-### Update One With `ignoreNull` Parameter
+
+### getByIds (with fields)
 ```java
 /**
-  * Update one data object by its ID.
-  *
-  * @param object the data object to update
-  * @param ignoreNull whether to ignore null values during the update
-  * @return true / Exception
-  */
-boolean updateOne(T object, boolean ignoreNull);
+ * Get multiple entities by ids, with specified fields to read.
+ * If the fields is not specified, all accessible fields as the default.
+ * The ManyToOne/OneToOne/Option/MultiOption fields are original values.
+ *
+ * @param ids data ids list
+ * @param fields field list to read
+ * @return a list of entities
+ */
+List<T> getByIds(List<K> ids, Collection<String> fields);
 ```
-### Update One And Return
+
+### getFieldValue
 ```java
 /**
-  * Update one data object by its ID. Null values are not ignored.
-  * Return the updated object fetched from the database with the latest field values.
-  *
-  * @param object the data object to update
-  * @return the updated object fetched from the database with the latest field values.
-  */
-T updateOneAndReturn(T object);
+ * Get the specified field value by id and field reference.
+ * The ManyToOne/OneToOne/Option/MultiOption fields are original values.
+ *
+ * @param id data id
+ * @param method field method, Lambda expression, method reference passing parameters
+ * @return field value
+ */
+<V extends Serializable, R> V getFieldValue(K id, SFunction<T, R> method);
 ```
-### Update One And Return With `ignoreNull` Parameter
+
+### getIds
 ```java
 /**
-  * Update one data object by its ID.
-  * Return the updated object fetched from the database with the latest field values.
-  *
-  * @param object the data object to update
-  * @param ignoreNull whether to ignore null values during the update
-  * @return the updated object fetched from the database, with the latest field values.
-  */
-T updateOneAndReturn(T object, boolean ignoreNull);
-```
-### Update List
-```java
-/**
-  * Update multiple data objects by their IDs. Null values are not ignored.
-  *
-  * @param objects the list of data objects to update
-  * @return true / Exception
-  */
-boolean updateList(List<T> objects);
-```
-### Update List With `ignoreNull` Parameter
-```java
-/**
-  * Update multiple data objects by their IDs.
-  *
-  * @param objects the list of data objects to update
-  * @param ignoreNull whether to ignore null values during the update
-  * @return true / Exception
-  */
-boolean updateList(List<T> objects, boolean ignoreNull);
-```
-### Update List And Return
-```java
-/**
-  * Update multiple data objects by their IDs. Null values are not ignored.
-  * Return the updated object fetched from the database with the latest field values.
-  *
-  * @param objects the list of data objects to update
-  * @return the updated objects fetched from the database with the latest field values.
-  */
-List<T> updateListAndReturn(List<T> objects);
-```
-### Update List And Return With `ignoreNull` Parameter
-```java
-/**
-  * Update multiple data objects by their IDs.
-  * Return the updated object fetched from the database with the latest field values.
-  *
-  * @param objects the list of data objects to update
-  * @param ignoreNull whether to ignore null values during the update
-  * @return the updated objects fetched from the database with the latest field values.
-  */
-List<T> updateListAndReturn(List<T> objects, boolean ignoreNull);
-```
-### Delete One Row
-```java
-/**
-  * Delete one data object by ID.
-  *
-  * @param id data id
-  * @return true / Exception
-  */
-boolean deleteOne(K id);
-```
-### Delete List
-```java
-/**
-  * Delete multiple data objects by IDs.
-  *
-  * @param ids data ids
-  * @return true / Exception
-  */
-boolean deleteList(List<K> ids);
-```
-### Delete By Filters
-```java
-/**
-  * Delete data objects by specified filters.
-  *
-  * @param filters filter conditions
-  * @return true / Exception
-  */
-boolean deleteByFilters(Filters filters);
-```
-### Get Ids
-```java
-/**
-  * Get the ids based on the filters.
-  *
-  * @param filters filters
-  * @return ids list
-  */
+ * Get the ids based on the filters.
+ *
+ * @param filters the filters to apply
+ * @return a list of IDs
+ */
 List<K> getIds(Filters filters);
 ```
-### Get Relational Field IDs
+
+### getRelatedIds (with method reference)
 ```java
 /**
-  * Get the ids for ManyToOne/OneToOne relational field.
-  *
-  * @param filters filters
-  * @param fieldName relational field name
-  * @return distinct ids for relational field
-  */
-List<K> getRelatedIds(Filters filters, String fieldName);
+ * Get the distinct ids for ManyToOne/OneToOne relational field based on the filters.
+ *
+ * @param <EK> the type of the related entity ID, extending Serializable
+ * @param <R> the return type of the method reference
+ * @param filters the filters to apply
+ * @param method field method, Lambda expression, method reference passing parameters
+ * @return distinct ids for relational field
+ */
+<EK extends Serializable, R> List<EK> getRelatedIds(Filters filters, SFunction<T, R> method);
 ```
-### Search One With Filters
+
+### getRelatedIds (with fieldName)
 ```java
 /**
-  * Query a single object based on filters. Only for code use.
-  * Throw an exception when there are multiple objects.
-  *
-  * @param filters filters object
-  * @return single object
-  */
+ * Get the distinct ids for ManyToOne/OneToOne relational field based on the filters.
+ *
+ * @param <EK> the type of the related entity ID, extending Serializable
+ * @param filters filters
+ * @param fieldName relational field name
+ * @return distinct ids for relational field
+ */
+<EK extends Serializable> List<EK> getRelatedIds(Filters filters, String fieldName);
+```
+
+### updateOne (null ignored)
+```java
+/**
+ * Updates an existing entity by its ID. Null values are ignored.
+ *
+ * @param entity the entity with updated values
+ * @return true if the update was successful; otherwise, an exception is thrown
+ */
+boolean updateOne(T entity);
+```
+
+### updateOne (option to ignore null)
+```java
+/**
+ * Updates an existing entity by its ID, with an option to ignore null values.
+ *
+ * @param entity the entity with updated values
+ * @param ignoreNull if `true`, null values are ignored; otherwise, they overwrite existing values
+ * @return `true` if the update was successful; otherwise, an exception is thrown
+ */
+boolean updateOne(T entity, boolean ignoreNull);
+```
+
+### updateOneAndFetch (null ignored)
+```java
+/**
+ * Updates an existing entity by its ID. Null values are ignored.
+ * Returns the updated entity with the latest field values.
+ *
+ * @param entity the entity with updated values
+ * @return the updated entity with the latest field values
+ */
+T updateOneAndFetch(T entity);
+```
+
+### updateOneAndFetch (option to ignore null)
+```java
+/**
+ * Updates an existing entity by its ID, with an option to ignore null values.
+ * Returns the updated entity with the latest field values.
+ *
+ * @param entity the entity with updated values
+ * @param ignoreNull if `true`, null values are ignored; otherwise, they overwrite existing values
+ * @return the updated entity with the latest field values
+ */
+T updateOneAndFetch(T entity, boolean ignoreNull);
+```
+
+### updateList (null ignored)
+```java
+/**
+ * Updates multiple entities by their IDs. Null values are ignored.
+ *
+ * @param entities the list of entities to be updated
+ * @return `true` if the update was successful; otherwise, an exception is thrown
+ */
+boolean updateList(List<T> entities);
+```
+
+### updateList (option to ignore null)
+```java
+/**
+ * Updates multiple entities by their IDs, with an option to ignore null values.
+ *
+ * @param entities the list of entities to be updated
+ * @param ignoreNull if `true`, null values are ignored; otherwise, they overwrite existing values
+ * @return `true` if the update was successful; otherwise, an exception is thrown
+ */
+boolean updateList(List<T> entities, boolean ignoreNull);
+```
+
+### updateListAndFetch (null ignored)
+```java
+/**
+ * Updates multiple entities by their IDs. Null values are ignored.
+ * Returns the updated entities with the latest field values.
+ *
+ * @param entities the list of entities to be updated
+ * @return a list of updated entities with the latest field values
+ */
+List<T> updateListAndFetch(List<T> entities);
+```
+
+### updateListAndFetch (option to ignore null)
+```java
+/**
+ * Updates multiple entities by their IDs, with an option to ignore null values.
+ * Returns the updated entities with the latest field values.
+ *
+ * @param entities the list of entities to be updated
+ * @param ignoreNull if `true`, null values are ignored; otherwise, they overwrite existing values
+ * @return a list of updated entities with the latest field values
+ */
+List<T> updateListAndFetch(List<T> entities, boolean ignoreNull);
+```
+
+### deleteById
+```java
+/**
+ * Deletes an entity by its ID.
+ *
+ * @param id the ID of the entity to be deleted
+ * @return `true` if the deletion was successful; otherwise, an exception is thrown
+ */
+boolean deleteById(K id);
+```
+
+### deleteByIds
+```java
+/**
+ * Deletes multiple entities by their IDs.
+ *
+ * @param ids the list of IDs of the entities to be deleted
+ * @return `true` if the deletion was successful; otherwise, an exception is thrown
+ */
+boolean deleteByIds(List<K> ids);
+```
+
+### deleteByFilters
+```java
+/**
+ * Deletes entities based on the specified filters.
+ *
+ * @param filters the filters that determine which entities to delete
+ * @return `true` if the deletion was successful; otherwise, an exception is thrown
+ */
+boolean deleteByFilters(Filters filters);
+```
+
+### searchOne (Filters)
+```java
+/**
+ * Query one entity that matches the specified filters.
+ * If multiple entities match, an exception is thrown.
+ *
+ * @param filters the filters used to find the entity
+ * @return the single matching entity
+ */
 T searchOne(Filters filters);
 ```
-### Search One With FlexQuery
+
+### searchOne (FlexQuery)
 ```java
 /**
-  * Query a single object based on filters. Only for code use.
-  * Throw an exception when there are multiple objects.
-  *
-  * @param flexQuery FlexQuery object, can set fields, filters, orders, etc.
-  * @return single object
-  */
+ * Query one entity that matches the specified FlexQuery, which can set fields to read.
+ * If multiple entities match, an exception is thrown.
+ *
+ * @param flexQuery FlexQuery object containing fields, filters, orders, etc.
+ * @return the single matching entity
+ */
 T searchOne(FlexQuery flexQuery);
 ```
-### Search List
+
+### searchList (no args)
 ```java
 /**
-  * Query objects without pagination, only for code use.
-  * If the result exceeds the MAX_BATCH_SIZE, an error log is recorded, but no exception is thrown.
-  *
-  * @return object list
-  */
+ * Query all entities without pagination. Only for code use.
+ * If the result exceeds the MAX_BATCH_SIZE, an error is logged, but no exception is thrown.
+ *
+ * @return a list of all entities
+ */
 List<T> searchList();
 ```
-### Search List With Filters
+
+### searchList (Filters)
 ```java
 /**
-  * Query objects based on Filters without pagination, only for code use.
-  * If the result exceeds the MAX_BATCH_SIZE, an error log is recorded, but no exception is thrown.
-  *
-  * @param filters filters
-  * @return object list
-  */
+ * Query all entities that match the specified filters without pagination.
+ * If the result exceeds the MAX_BATCH_SIZE, an error is logged, but no exception is thrown.
+ *
+ * @param filters the filters used to find the entities
+ * @return a list of matching entities
+ */
 List<T> searchList(Filters filters);
 ```
-### Search List With FlexQuery
+
+### searchList (FlexQuery)
 ```java
 /**
-  * Query objects based on FlexQuery without pagination, only for code use.
-  * If the result exceeds the MAX_BATCH_SIZE, an error log is recorded, but no exception is thrown.
-  *
-  * @param flexQuery FlexQuery object, can set fields, filters, orders, etc.
-  * @return object list
-  */
+ * Query all entities that match the specified flexQuery without pagination.
+ * If the result exceeds the MAX_BATCH_SIZE, an error log is recorded, but no exception is thrown.
+ *
+ * @param flexQuery FlexQuery object containing fields, filters, orders, etc.
+ * @return a list of matching entities
+ */
 List<T> searchList(FlexQuery flexQuery);
 ```
 
-### Search List And Conversion To DTO
+### searchList (FlexQuery, DTO)
 ```java
 /**
- * Searches for objects based on the provided FlexQuery and maps them to the specified DTO class.
- * If the result exceeds the MAX_BATCH_SIZE, an error log is recorded, but no exception is thrown.
+ * Executes a FlexQuery without pagination and maps the results to the specified DTO type.
+ * If the result exceeds the MAX_BATCH_SIZE, an error is logged, but no exception is thrown.
  *
- * @param <R> the type of the DTO class
- * @param flexQuery FlexQuery object, can set fields, filters, orders, etc.
- * @param dtoClass the class of the objects to be returned
- * @return object list of the specified DTO class
+ * @param <R> the DTO type
+ * @param flexQuery FlexQuery object containing fields, filters, sorting, etc.
+ * @param dtoClass the class of the DTO type
+ * @return a list of DTO objects of the specified type
  */
 <R> List<R> searchList(FlexQuery flexQuery, Class<R> dtoClass);
 ```
 
-### Pagination Search By FlexQuery
+### searchPage (FlexQuery)
 ```java
 /**
-  * Query objects based on FlexQuery with pagination.
-  * The page size cannot exceed the MAX_BATCH_SIZE.
-  *
-  * @param flexQuery FlexQuery object, can set fields, filters, orders, etc.
-  * @param page the Page object containing pagination information
-  * @return a Page object containing the objects
-  */
+ * Performs a paginated query based on a FlexQuery.
+ * <p>The page size must not exceed MAX_BATCH_SIZE.</p>
+ *
+ * @param flexQuery a FlexQuery object containing fields, filters, sorting, etc.
+ * @param page a Page object containing pagination information
+ * @return a Page containing the requested entities
+ */
 Page<T> searchPage(FlexQuery flexQuery, Page<T> page);
 ```
 
-### Pagination Search And Conversion To DTO
+### searchPage (FlexQuery, DTO)
 ```java
 /**
- * Query objects based on FlexQuery with pagination and map them to the specified DTO class.
- * The page size cannot exceed the MAX_BATCH_SIZE.
+ * Performs a paginated query based on a FlexQuery and maps the results to a specified DTO type.
+ * <p>The page size must not exceed MAX_BATCH_SIZE.</p>
  *
- * @param <R> the type of the DTO class
- * @param flexQuery FlexQuery object, can set fields, filters, orders, etc.
- * @param page the Page object containing pagination information
- * @param dtoClass the class of the objects to be returned
- * @return a Page object containing the DTO objects
+ * @param <R> the DTO type
+ * @param flexQuery a FlexQuery object containing fields, filters, sorting, etc.
+ * @param page a Page object containing pagination information
+ * @param dtoClass the class of the DTO type
+ * @return a Page containing the requested DTO objects
  */
 <R> Page<R> searchPage(FlexQuery flexQuery, Page<R> page, Class<R> dtoClass);
 ```
-### Query And Group By ID
+
+### groupById
 ```java
 /**
- * Groups objects by their ID based on the provided filters.
- * If the result exceeds the MAX_BATCH_SIZE, an error log is recorded, but no exception is thrown.
+ * Groups entities by their IDs based on the provided filters.
+ * <p>If the result exceeds MAX_BATCH_SIZE, an error is logged but no exception is thrown.</p>
  *
- * @param filters the filters to apply when searching for objects
- * @return objects map (id -> object)
+ * @param filters the filters used to find the entities
+ * @return a map of IDs to the corresponding entities
  */
-Map<Long, T> groupById(Filters filters);
+Map<Serializable, T> groupById(Filters filters);
 ```
