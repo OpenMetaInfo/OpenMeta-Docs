@@ -1,336 +1,419 @@
 # 构建专业代码应用
 
 ## EntityService 通用方法
+### createOne
+```java
+/**
+ * 创建一个新的实体并返回其 ID。
+ *
+ * @param entity 要创建的实体
+ * @return 新创建实体的 ID
+ */
+K createOne(T entity);
+```
 
-### 创建一条数据，返回 ID
+### createOneAndFetch
 ```java
 /**
- * 创建一个数据对象并返回ID。
+ * 创建一个新的实体，并返回带有自动生成字段值的实体对象。
  *
- * @param object 要创建的数据对象
- * @return ID
+ * @param entity 要创建的实体
+ * @return 新创建的实体对象
  */
-K createOne(T object);
+T createOneAndFetch(T entity);
 ```
-### 创建一条数据，返回最新数据
+
+### createList
 ```java
 /**
- * 创建一个数据对象，返回带有ID和其他最新字段值的对象。
+ * 批量创建多个实体，并返回这些实体的 ID 列表。
  *
- * @param object 要创建的数据对象
- * @return 带有ID和其他最新字段值的对象
+ * @param entities 要创建的实体列表
+ * @return 创建后的实体 ID 列表
  */
-T createOneAndReturn(T object);
+List<K> createList(List<T> entities);
 ```
-### 批量创建数据，返回 ID 列表
+
+### createListAndFetch
 ```java
 /**
- * 创建多个数据对象并返回ID列表。
+ * 批量创建多个实体，并返回包含自动生成字段值的实体对象列表。
  *
- * @param objects 要创建的数据对象列表
- * @return ID列表
+ * @param entities 要创建的实体列表
+ * @return 新创建的实体对象列表
  */
-List<K> createList(List<T> objects);
+List<T> createListAndFetch(List<T> entities);
 ```
-### 批量创建数据，返回最新数据列表
+
+### getById (单个ID)
 ```java
 /**
- * 创建多个数据对象，返回带有ID和其他最新字段值的对象列表。
+ * 根据 ID 获取实体。
+ * ManyToOne/OneToOne/Option/MultiOption 字段保留原始值。
  *
- * @param objects 要创建的数据对象列表
- * @return 带有ID和其他最新字段值的对象列表
+ * @param id 要获取的实体 ID
+ * @return 如果找到则返回包含实体的 Optional，否则返回空
  */
-List<T> createListAndReturn(List<T> objects);
+Optional<T> getById(K id);
 ```
-### 根据 ID 读取一条对象数据
+
+### getById (含子查询 SubQueries)
 ```java
 /**
- * 根据ID读取一个数据对象。
- * ManyToOne/OneToOne/Option/MultiOption字段为原始值。
+ * 根据 ID 获取实体，可使用 subQueries 展开关联字段。
+ * ManyToOne/OneToOne/Option/MultiOption 字段保留原始值。
  *
- * @param id 数据ID
- * @return 数据对象
+ * @param id 要获取的实体 ID
+ * @param subQueries 用于展开关联字段的对象
+ * @return 如果找到则返回包含实体的 Optional，否则返回空
  */
-T readOne(K id);
+Optional<T> getById(K id, SubQueries subQueries);
 ```
-### 根据 ID 读取对象指定字段数据
+
+### getById (指定字段)
 ```java
 /**
- * 根据ID读取一个数据对象。
+ * 根据 ID 获取实体，并可指定要读取的字段。
  * 如果未指定字段，则默认读取所有可访问字段。
- * ManyToOne/OneToOne/Option/MultiOption字段为原始值。
+ * ManyToOne/OneToOne/Option/MultiOption 字段保留原始值。
  *
- * @param id 数据ID
+ * @param id 要获取的实体 ID
  * @param fields 要读取的字段列表
- * @return 数据对象
+ * @return 如果找到则返回包含实体的 Optional，否则返回空
  */
-T readOne(K id, Collection<String> fields);
+Optional<T> getById(K id, Collection<String> fields);
 ```
-### 根据 ID 列表读取对象列表
+
+### getByIds (ID列表)
 ```java
 /**
- * 根据ID列表读取多个数据对象。
- * ManyToOne/OneToOne/Option/MultiOption字段为原始值。
+ * 根据 ID 列表获取多个实体。
+ * ManyToOne/OneToOne/Option/MultiOption 字段保留原始值。
  *
- * @param ids 数据ID列表
- * @return 数据对象列表
+ * @param ids 要获取的实体 ID 列表
+ * @return 实体列表
  */
-List<T> readList(List<K> ids);
+List<T> getByIds(List<K> ids);
 ```
-### 根据 ID 列表和指定字段读取对象列表
+
+### getByIds (含子查询 SubQueries)
 ```java
 /**
- * 根据ID列表读取多个数据对象。
+ * 根据 ID 列表获取多个实体，并可使用 subQueries 展开关联字段。
+ * ManyToOne/OneToOne/Option/MultiOption 字段保留原始值。
+ *
+ * @param ids 实体 ID 列表
+ * @param subQueries 用于展开关联字段的对象
+ * @return 实体列表
+ */
+List<T> getByIds(List<K> ids, SubQueries subQueries);
+```
+
+### getByIds (指定字段)
+```java
+/**
+ * 根据 ID 列表获取多个实体，并可指定要读取的字段。
  * 如果未指定字段，则默认读取所有可访问字段。
- * ManyToOne/OneToOne/Option/MultiOption字段为原始值。
+ * ManyToOne/OneToOne/Option/MultiOption 字段保留原始值。
  *
- * @param ids 数据ID列表
+ * @param ids 实体 ID 列表
  * @param fields 要读取的字段列表
- * @return 数据对象列表
+ * @return 实体列表
  */
-List<T> readList(List<K> ids, Collection<String> fields);
+List<T> getByIds(List<K> ids, Collection<String> fields);
 ```
-### 更新一条数据
+
+### getFieldValue
 ```java
 /**
- * 根据ID更新一个数据对象。空值不会被忽略。
+ * 根据实体 ID 和字段方法引用，获取指定字段的值。
+ * ManyToOne/OneToOne/Option/MultiOption 字段保留原始值。
  *
- * @param object 要更新的数据对象
- * @return true / 异常
+ * @param id 实体 ID
+ * @param method 字段访问方法（Lambda 表达式或方法引用）
+ * @param <V> 字段值类型
+ * @param <R> 字段访问方法的返回类型
+ * @return 字段的值
  */
-boolean updateOne(T object);
+<V extends Serializable, R> V getFieldValue(K id, SFunction<T, R> method);
 ```
-### 更新一条数据，指定是否忽略 null 值
+
+### getIds
 ```java
 /**
- * 根据ID更新一个数据对象。
+ * 根据过滤条件获取符合条件的实体 ID 列表。
  *
- * @param object 要更新的数据对象
- * @param ignoreNull 是否在更新时忽略空值
- * @return true / 异常
- */
-boolean updateOne(T object, boolean ignoreNull);
-```
-### 更新一条数据，返回最新对象
-```java
-/**
- * 根据ID更新一个数据对象。
- *
- * @param object 要更新的数据对象
- * @param ignoreNull 是否在更新时忽略空值
- * @return true / 异常
- */
-T updateOneAndReturn(T object);
-```
-### 更新一条数据，返回最新对象，指定是否忽略 null 值
-```java
-/**
- * 根据ID更新一个数据对象。
- * 返回从数据库中获取的带有最新字段值的更新对象。
- *
- * @param object 要更新的数据对象
- * @param ignoreNull 是否在更新时忽略空值
- * @return 从数据库中获取的带有最新字段值的更新对象
- */
-T updateOneAndReturn(T object, boolean ignoreNull);
-```
-### 更新对象列表
-```java
-/**
- * 根据ID列表更新多个数据对象。空值不会被忽略。
- *
- * @param objects 要更新的数据对象列表
- * @return true / 异常
- */
-boolean updateList(List<T> objects);
-```
-### 更新对象列表，指定是否忽略 null 值
-```java
-/**
- * 根据ID列表更新多个数据对象。
- *
- * @param objects 要更新的数据对象列表
- * @param ignoreNull 是否在更新时忽略空值
- * @return true / 异常
- */
-boolean updateList(List<T> objects, boolean ignoreNull);
-```
-### 更新对象列表，返回最新对象列表
-```java
-/**
- * 根据ID列表更新多个数据对象。空值不会被忽略。
- * 返回从数据库中获取的带有最新字段值的更新对象列表。
- *
- * @param objects 要更新的数据对象列表
- * @return 从数据库中获取的带有最新字段值的更新对象列表
- */
-List<T> updateListAndReturn(List<T> objects);
-```
-### 更新对象列表，返回最新对象列表，指定是否忽略 null 值
-```java
-/**
- * 根据ID列表更新多个数据对象。
- * 返回从数据库中获取的带有最新字段值的更新对象列表。
- *
- * @param objects 要更新的数据对象列表
- * @param ignoreNull 是否在更新时忽略空值
- * @return 从数据库中获取的带有最新字段值的更新对象列表
- */
-List<T> updateListAndReturn(List<T> objects, boolean ignoreNull);
-```
-### 根据 ID 删除一条数据
-```java
-/**
- * 根据ID删除一个数据对象。
- *
- * @param id 数据ID
- * @return true / 异常
- */
-boolean deleteOne(K id);
-```
-### 根据 ID 列表删除数据列表
-```java
-/**
- * 根据ID列表删除多个数据对象。
- *
- * @param ids 数据ID列表
- * @return true / 异常
- */
-boolean deleteList(List<K> ids);
-```
-### 根据筛选条件删除多条数据
-```java
-/**
- * 根据指定的过滤条件删除数据对象。
- *
- * @param filters 过滤条件
- * @return true / 异常
- */
-boolean deleteByFilters(Filters filters);
-```
-### 根据筛选条件获取 ID 列表
-```java
-/**
- * 根据过滤条件获取ID列表。
- *
- * @param filters 过滤条件
- * @return ID列表
+ * @param filters 要应用的过滤条件
+ * @return 匹配的实体 ID 列表
  */
 List<K> getIds(Filters filters);
 ```
-### 获取关系型字段的 ID 列表
+
+### getRelatedIds (字段方法引用)
 ```java
 /**
- * 获取ManyToOne/OneToOne关系字段的ID。
+ * 根据过滤条件，获取 ManyToOne/OneToOne 关联字段的去重 ID 列表。
  *
+ * @param <EK> 关联实体 ID 类型
+ * @param <R> 字段访问方法的返回类型
  * @param filters 过滤条件
- * @param fieldName 关系字段名称
- * @return 关系字段的唯一ID列表
+ * @param method 字段访问方法（Lambda 表达式或方法引用）
+ * @return 去重的关联实体 ID 列表
  */
-List<K> getRelatedIds(Filters filters, String fieldName);
+<EK extends Serializable, R> List<EK> getRelatedIds(Filters filters, SFunction<T, R> method);
 ```
-### 筛选一条数据
+
+### getRelatedIds (字段名)
 ```java
 /**
- * 根据过滤条件查询单个对象。仅供代码使用。
- * 当有多个对象时抛出异常。
+ * 根据过滤条件和字段名，获取 ManyToOne/OneToOne 关联字段的去重 ID 列表。
  *
- * @param filters 过滤条件对象
- * @return 单个对象
+ * @param <EK> 关联实体 ID 类型
+ * @param filters 过滤条件
+ * @param fieldName 关联字段名称
+ * @return 去重的关联实体 ID 列表
+ */
+<EK extends Serializable> List<EK> getRelatedIds(Filters filters, String fieldName);
+```
+
+### updateOne (忽略 null)
+```java
+/**
+ * 根据实体 ID 更新已有实体，忽略空值（null）。
+ *
+ * @param entity 包含更新数据的实体
+ * @return 若更新成功返回 true，否则抛出异常
+ */
+boolean updateOne(T entity);
+```
+
+### updateOne (可选择忽略 null)
+```java
+/**
+ * 根据实体 ID 更新已有实体，可选择是否忽略空值（null）。
+ *
+ * @param entity 包含更新数据的实体
+ * @param ignoreNull 若为 true，则忽略空值；否则空值将覆盖原值
+ * @return 若更新成功返回 true，否则抛出异常
+ */
+boolean updateOne(T entity, boolean ignoreNull);
+```
+
+### updateOneAndFetch (忽略 null)
+```java
+/**
+ * 根据实体 ID 更新已有实体，忽略空值（null）。
+ * 返回更新后的实体，包含最新字段值。
+ *
+ * @param entity 包含更新数据的实体
+ * @return 更新后的实体（包含最新字段值）
+ */
+T updateOneAndFetch(T entity);
+```
+
+### updateOneAndFetch (可选择忽略 null)
+```java
+/**
+ * 根据实体 ID 更新已有实体，可选择是否忽略空值（null）。
+ * 返回更新后的实体，包含最新字段值。
+ *
+ * @param entity 包含更新数据的实体
+ * @param ignoreNull 若为 true，则忽略空值；否则空值将覆盖原值
+ * @return 更新后的实体（包含最新字段值）
+ */
+T updateOneAndFetch(T entity, boolean ignoreNull);
+```
+
+### updateList (忽略 null)
+```java
+/**
+ * 批量更新多个实体（根据 ID），忽略空值（null）。
+ *
+ * @param entities 要更新的实体列表
+ * @return 若更新成功返回 true，否则抛出异常
+ */
+boolean updateList(List<T> entities);
+```
+
+### updateList (可选择忽略 null)
+```java
+/**
+ * 批量更新多个实体（根据 ID），可选择是否忽略空值（null）。
+ *
+ * @param entities 要更新的实体列表
+ * @param ignoreNull 若为 true，则忽略空值；否则空值将覆盖原值
+ * @return 若更新成功返回 true，否则抛出异常
+ */
+boolean updateList(List<T> entities, boolean ignoreNull);
+```
+
+### updateListAndFetch (忽略 null)
+```java
+/**
+ * 批量更新多个实体（根据 ID），忽略空值（null）。
+ * 返回更新后的实体列表，包含最新字段值。
+ *
+ * @param entities 要更新的实体列表
+ * @return 更新后的实体列表（包含最新字段值）
+ */
+List<T> updateListAndFetch(List<T> entities);
+```
+
+### updateListAndFetch (可选择忽略 null)
+```java
+/**
+ * 批量更新多个实体（根据 ID），可选择是否忽略空值（null）。
+ * 返回更新后的实体列表，包含最新字段值。
+ *
+ * @param entities 要更新的实体列表
+ * @param ignoreNull 若为 true，则忽略空值；否则空值将覆盖原值
+ * @return 更新后的实体列表（包含最新字段值）
+ */
+List<T> updateListAndFetch(List<T> entities, boolean ignoreNull);
+```
+
+### deleteById
+```java
+/**
+ * 根据实体 ID 删除对应的实体。
+ *
+ * @param id 要删除的实体 ID
+ * @return 若删除成功返回 true，否则抛出异常
+ */
+boolean deleteById(K id);
+```
+
+### deleteByIds
+```java
+/**
+ * 批量删除多个实体（根据 ID 列表）。
+ *
+ * @param ids 要删除的实体 ID 列表
+ * @return 若删除成功返回 true，否则抛出异常
+ */
+boolean deleteByIds(List<K> ids);
+```
+
+### deleteByFilters
+```java
+/**
+ * 根据指定过滤条件删除实体。
+ *
+ * @param filters 用于匹配实体的过滤条件
+ * @return 若删除成功返回 true，否则抛出异常
+ */
+boolean deleteByFilters(Filters filters);
+```
+
+### searchOne (Filters)
+```java
+/**
+ * 根据过滤条件查询单个实体。
+ * 若匹配到多个实体，则抛出异常。
+ *
+ * @param filters 用于查询的过滤条件
+ * @return 匹配的单个实体
  */
 T searchOne(Filters filters);
 ```
-### 筛选一条数据
+
+### searchOne (FlexQuery)
 ```java
 /**
- * 根据过滤条件查询单个对象。仅供代码使用。
- * 当有多个对象时抛出异常。
+ * 使用指定的 FlexQuery 查询单个实体，可设置需要读取的字段等。
+ * 若匹配到多个实体，则抛出异常。
  *
- * @param flexQuery FlexQuery对象，可以设置字段、过滤条��、排序等
- * @return 单个对象
+ * @param flexQuery 包含字段、过滤条件、排序等信息的 FlexQuery 对象
+ * @return 匹配的单个实体
  */
 T searchOne(FlexQuery flexQuery);
 ```
-### 查询数据列表，无筛选条件
+
+### searchList (无参)
 ```java
 /**
- * 根据过滤条件查询单个对象。仅供代码使用。
- * 当有多个对象时抛出异常。
+ * 无分页查询所有实体（仅限代码调用）。
+ * 如果结果数量超过 MAX_BATCH_SIZE，会记录错误日志，但不抛出异常。
  *
- * @param flexQuery FlexQuery对象，可以设置字段、过滤条��、排序等
- * @return 单个对象
+ * @return 所有实体的列表
  */
 List<T> searchList();
 ```
-### 根据条件查询数据列表
+
+### searchList (Filters)
 ```java
 /**
- * 根据过滤条件查询对象，不分页，仅供代码使用。
- * 如果结果超过MAX_BATCH_SIZE，则记录错误日志，但不抛出异常。
+ * 根据过滤条件无分页查询实体（仅限代码调用）。
+ * 如果结果数量超过 MAX_BATCH_SIZE，会记录错误日志，但不抛出异常。
  *
- * @param filters 过滤条件
- * @return 对象列表
+ * @param filters 用于查询的过滤条件
+ * @return 匹配的实体列表
  */
 List<T> searchList(Filters filters);
 ```
-### 根据条件查询数据列表
+
+### searchList (FlexQuery)
 ```java
 /**
- * 根据FlexQuery查询对象，不分页，仅供代码使用。
- * 如果结果超过MAX_BATCH_SIZE，则记录错误日志，但不抛出异常。
+ * 根据指定的 FlexQuery 无分页查询实体（仅限代码调用）。
+ * 如果结果数量超过 MAX_BATCH_SIZE，会记录错误日志，但不抛出异常。
  *
- * @param flexQuery FlexQuery对象，可以设置字段、过滤条件、排序等
- * @return 对象列表
+ * @param flexQuery 包含字段、过滤条件、排序等信息的 FlexQuery 对象
+ * @return 匹配的实体列表
  */
 List<T> searchList(FlexQuery flexQuery);
 ```
-#### 查询并转换为 DTO 对象列表
+
+### searchList (FlexQuery, DTO)
 ```java
 /**
- * 根据提供的FlexQuery查询对象并将其映射到指定的DTO类。
- * 如果结果超过MAX_BATCH_SIZE，则记录错误日志，��不抛出异常。
+ * 执行无分页的 FlexQuery，并将结果映射为指定的 DTO 类型。
+ * 如果结果数量超过 MAX_BATCH_SIZE，会记录错误日志，但不抛出异常。
  *
- * @param <R> DTO类的类型
- * @param flexQuery FlexQuery对象，可以设置字段、过滤条件、排序等
- * @param dtoClass 要返回的对象的类
- * @return 指定DTO类的对象列表
+ * @param <R> DTO 类型
+ * @param flexQuery 包含字段、过滤条件、排序等信息的 FlexQuery 对象
+ * @param dtoClass 要映射成的 DTO 类型
+ * @return 指定类型的 DTO 列表
  */
 <R> List<R> searchList(FlexQuery flexQuery, Class<R> dtoClass);
 ```
-### 分页查询数据
+
+### searchPage (FlexQuery)
 ```java
 /**
- * 根据FlexQuery查询对象并分页。
- * 页面大小不能超过MAX_BATCH_SIZE。
+ * 基于 FlexQuery 执行分页查询。
+ * <p>分页大小不能超过 MAX_BATCH_SIZE。</p>
  *
- * @param flexQuery FlexQuery对象，可以设置字段、过滤条件、排序等
- * @param page 包含分页信息的Page对象
- * @return 包含对象的Page对象
+ * @param flexQuery 包含字段、过滤条件、排序等信息的 FlexQuery 对象
+ * @param page 包含分页信息的 Page 对象
+ * @return 包含查询结果的 Page 对象
  */
 Page<T> searchPage(FlexQuery flexQuery, Page<T> page);
 ```
-#### 分页查询并转换为 DTO 对象分页
+
+### searchPage (FlexQuery, DTO)
 ```java
 /**
- * 根据FlexQuery查询对象并分页，并将其映射到指定的DTO类。
- * 页面大小不能超过MAX_BATCH_SIZE。
+ * 基于 FlexQuery 执行分页查询，并将结果映射为指定的 DTO 类型。
+ * <p>分页大小不能超过 MAX_BATCH_SIZE。</p>
  *
- * @param <R> DTO类的类型
- * @param flexQuery FlexQuery对象，可以设置字段、过滤���件、排序等
- * @param page 包含分页信息的Page对象
- * @param dtoClass 要返回的对象的类
- * @return 包含DTO对象的Page对象
+ * @param <R> DTO 类型
+ * @param flexQuery 包含字段、过滤条件、排序等信息的 FlexQuery 对象
+ * @param page 包含分页信息的 Page 对象
+ * @param dtoClass 要映射成的 DTO 类型
+ * @return 包含查询到的 DTO 对象的 Page
  */
 <R> Page<R> searchPage(FlexQuery flexQuery, Page<R> page, Class<R> dtoClass);
 ```
-### 查询对象数据并将结果按照 ID 分组
+
+### groupById
 ```java
 /**
- * 根据提供的过滤条件按ID分组对象。
- * 如果结果超过MAX_BATCH_SIZE，则记录错误日志，但不抛出异常。
+ * 根据过滤条件查询实体，并以实体 ID 为键进行分组。
+ * <p>如果结果数量超过 MAX_BATCH_SIZE，会记录错误日志，但不抛出异常。</p>
  *
- * @param filters 搜索对象时应用的过滤条件
- * @return 对象映射（ID -> 对象）
+ * @param filters 用于查找实体的过滤条件
+ * @return 一个 Map，键为实体 ID，值为对应的实体
  */
-Map<Long, T> groupById(Filters filters);
+Map<Serializable, T> groupById(Filters filters);
 ```
