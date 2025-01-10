@@ -45,6 +45,12 @@ SubQueries subQueries = new SubQueries().expand(Department::getEmployees)
         .expand(DesignModel::getPositions);
 Department dept = this.getById(id, subQueries);
 ```
+其它示例：
+```java
+// 获取导入模板时，同时获取该模板下的导入字段列表
+SubQueries subQueries = new SubQueries().expand(ImportTemplate::getImportFields);
+ImportTemplate importTemplate = importTemplateService.getById(templateId, subQueries);
+```
 
 ## 2. Filters 对象构建
 以在线招聘系统中的 Job 业务模型为例，定义如下几个简单属性。接下来以这个模型为例，介绍如何在代码中构建简单查询条件和复合查询条件。
