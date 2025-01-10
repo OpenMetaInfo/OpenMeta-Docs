@@ -1,268 +1,116 @@
-# 通用查询条件
+# 多租户支持
 
-## 1. FlexQuery 动态查询
+## 1 多租户介绍
 
-### 1.1 单模型查询
+多租户是一种软件架构模式，允许多个租户（Tenant）共享同一个系统实例，同时又能确保租户间数据隔离，从而实现资源复用、统一升级维护、标准化数据分析，以及规模化推广。
 
-```java
-// SELECT name, code FROM table WHERE name = 'PM' AND code = '001'
-FlexQuery flexQuery = new FlexQuery()
-    .select("name", "salary")
-    .where(new Filters().eq("name", "PM").eq("code", "001"));
-// 等价于：
-flexQuery = new FlexQuery()
-    .select(Job::getName, Job::getSalary)
-    .where(new Filters().eq(Job::getName, "PM").eq(Job::getCode, "001"));
-// 执行查询
-List<Job> jobs = this.searchList(flexQuery);
+OpenMeta 原生支持两种多租户模式：共享应用-共享数据库模式、共享应用-独立数据库模式。启用多租户后，自动根据租户隔离数据。
+![Multi tenancy](/image/multi-tenancy.png)
+
+## 2 启用多租户
+
+### 2.1 多租户模式一：共享应用-共享数据库
+
+在配置文件中设置 `system.multi-tenancy.enable=true` 启用多租户。如：
+
+```yaml
+system:
+  multi-tenancy:
+    enable: true
 ```
 
-专业代码写法：
+### 2.2 多租户模式二：共享应用-独立数据库
 
-```java
-private List<DesignAppVersion> getHistoricalVersion(Long envId) {
-    List<String> fields = ListUtils.getLambdaFields(
-            DesignAppVersion::getName,
-            DesignAppVersion::getAppId,
-            DesignAppVersion::getLocked,
-            DesignAppVersion::getPublished);
-    Filters filters = new Filters().eq(DesignAppVersion::getEnvId, envId)
-            .eq(DesignAppVersion::getLocked, false);
-    FlexQuery flexQuery = new FlexQuery().select(fields).where(filters);
-    return this.searchList(flexQuery);
-}
+由于 OpenMeta 本身支持 [动态多数据源](./datasource)，且 UserInfo 对象包含 tenantId 和 datasourceKey 两个字段。
+
+当用户登录时，在 ContextInterceptor 拦截器的实现类中，给这两个字段赋值即可。
+
+在配置文件中启用多租户 `system.multi-tenancy.enable=true`，同时启用动态多数据源，并且设置 `mode` 为 `multi-tenancy-isolated`。
+
+```yaml
+system:
+  multi-tenancy:
+    enable: true
+spring:
+  datasource:
+    dynamic:
+      enable: true
+      # mode: read-write-separation, switch-by-model, multi-tenancy-isolated, multi-datasource(default)
+      mode: multi-tenancy-isolated
+      datasource:
+        tenant1:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/demo
+          username: user0
+          password: pass0
+        tenant2:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/db1
+          username: user1
+          password: pass1
+        tenant3:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/db2
+          username: user2
+          password: pass2
 ```
 
-### 1.2 关联查询 OneToMany 数据
+## 3 多租户数据模型
 
-假设部门 Department 模型定义如下，其中 employees 和 positions 是两个 OneToMany 字段：
+启用多租户后，可以从模型级别设置是否进行租户数据隔离。
 
-```java
-public class Department {
-    private String name;
-    private List<Employee> employees;
-    private List<Position> positions;
-}
-```
+**模型启用多租户隔离的条件**：
 
-要查询指定 ID 的部门，同时返回部门下的所有员工和所有岗位数据：
+- 模型元数据设置 `multiTenant = true`，通过`multiTenant`属性控制哪些数据模型进行多租户隔离，也即`multiTenant = false`的模型可以在租户间共享。
 
-```java
-SubQueries subQueries = new SubQueries().expand(Department::getEmployees)
-        .expand(DesignModel::getPositions);
-Department dept = this.getById(id, subQueries);
-```
+- 给模型添加 `tenantId` 字段。该字段属性全局表现为只读，创建时根据当前用户的所属租户，填充`tenantId`字段值，且不允许修改。
 
-## 2. Filters 对象构建
+## 4 租户间数据隔离方案
 
-以在线招聘系统中的 Job 业务模型为例，定义如下几个简单属性。接下来以这个模型为例，介绍如何在代码中构建简单查询条件和复合查询条件。
+启用多租户后，ORM 会进行强制隔离和校验，且上下文 Context 中记录了当前用户的 tenantId（下文用 `user.tenantId` 表示）。
 
-```java
-public class Job {
-    private String title;     // 职位名称
-    private Integer grade;    // 职位等级: 1-20
-    private String status;    // 职位状态: Open, Closed, Cancelled
-    private Integer salary;   // 最低薪资，单位为 K
-}
-```
+### 4.1 简单查询
 
-### 2.1 简单的 `AND` 条件查询
-
-所有的查询操作方法，都支持 `Lambda` 表达式声明字段，如 `Job::getTitle`、`Job::getGrade` 等，也支持字符串写法，如 `"title"`、`"grade"` 等。
-在专业代码中，建议使用 `Lambda` 表达式，以避免拼写错误和字段重构带来的影响。特殊情况下，可以使用字符串写法。
-
-1. 分别构建 `filters1` 和 `filters2` 两个查询条件：
-
-```java
-// WHERE title = 'PM'
-Filters filters1 = new Filters().eq(Job::getTitle, "PM");
-// WHERE grade > 6
-Filters filters2 = new Filters().gt(Job::getGrade, 6);
-```
-
-使用字符串声明字段名的写法：
-
-```java
-Filters filters1 = new Filters().eq("title", "PM");
-Filters filters2 = new Filters().gt("grade", 6);
-```
-
-> 以下所有声明字段的操作方法，全部支持 `Lambda` 表达式写法和字符串写法，对应关系如下：
->
-> - Job::getTitle -> "title"
-> - Job::getGrade -> "grade"
-> - Job::getStatus -> "status"
-> - Job::getSalary -> "salary"
-
-2. 将 `filters1` 和 `filters2` 用 `AND` 逻辑合并，以下写法是等效的：
-
-```java
-// .and(filters) 该 and 方法是一个非静态方法，仅接收一个 filters 参数
-Filters filters3 = filters1.and(filters2);
-// .and(filters1, filters2, Filters...) 该 and 方法是一个静态方法，至少两个 filters 参数
-filters3 = Filters.and(filters1, filters2);
-// Filter 默认是 `AND` 逻辑
-filters3 = new Filters().eq(Job::getTitle, "PM").gt(Job::getGrade, 6);
-filters3 = Filters.and().eq(Job::getTitle, "PM").gt(Job::getGrade, 6);
-```
-
-3. `filters3` 等价于以下 `SQL` 语句：
+ORM 层强制在 WHERE 条件中追加租户过滤条件：
 
 ```sql
- WHERE title = 'PM' AND grade > 6
+tenant_id = user.tenantId
 ```
 
-### 2.2 简单的 `OR` 条件查询
+### 4.2 JOIN 查询
 
-1. 分别构建 `filters4` 和 `filters5` 两个查询条件：
-
-```java
-// WHERE status = 'Open'
-Filters filters4 = new Filters().eq(Job::getStatus, "Open");
-// WHERE salary < 30
-Filters filters5 = new Filters().lt(Job::getSalary, 30);
-```
-
-2. 将 `filters4` 和 `filters5` 用 `OR` 逻辑合并，以下写法是等效的：
-
-```java
-// .or(filters) 该 or 方法是一个非静态方法，仅接收一个 filters 参数
-Filters filters6 = filters4.or(filters5);
-// .or(filters4, filters5, Filters...) 该 or 方法是一个静态方法，至少两个 filters 参数
-filters6 = Filters.or(filters4, filters5);
-filters6 = Filters.or().eq(Job::getStatus, "Open").lt(Job::getSalary, 30);
-```
-
-3. `filters6` 等价于以下 `SQL` 语句：
+主表和关联表都会被自动追加租户过滤条件，无需开发人员代码干预。
 
 ```sql
- WHERE status = 'Open' OR salary < 30
+t0.tenant_id = user.tenantId  AND t1.tenant_id = user.tenantId
 ```
 
-### 2.3 复合查询条件：`AND` 逻辑合并
+### 4.3 创建数据
 
-1. 将 `filters1`, `filters2`, `filters6` 等多个查询对象，合并成一个 `AND` 查询条件，以下写法是等效的：
+创建数据时，ORM 层自动填充 `tenantId` 字段值：
 
 ```java
-// filters1 = new Filters().eq(Job::getTitle, "PM");
-// filters2 = new Filters().gt(Job::getGrade, 6);
-// filters6 = Filters.or().eq(Job::getStatus, "Open").lt(Job::getSalary, 30);
-// filters6 内部是一个 `OR` 逻辑
-Filters filters7 = filters1.and(filters2).and(filters6);
-filters7 = filters6.and(filters1).and(filters2);
-filters7 = Filters.and(filters1, filters2, filters6);
+tenantId = user.tenantId
 ```
 
-2. `filters7` 等价于以下 `SQL` 语句：
+如果客户端传递的数据指定了 tenantId，且值与当前用户的 tenantId 不相同，程序会抛出异常，需要关注可能发生的越权尝试事件。
 
-```sql
- WHERE title = 'PM' AND grade > 6 AND (status = 'Open' OR salary < 30)
-```
+### 4.4 更新数据
 
-3. `filters7` 更多等效的写法，可以根据上下文变量情况选择性使用：
+由于数据模型的 tenantID 是只读字段，ORM 层会自动忽略对 tenantId 的修改。
 
-```java
-filters7 = filters1.and(filters2.and(filters6));
-filters7 = filters1.and(Filters.and(filters2, filters6));
-// 条件之间进行 `AND` 合并，子条件可以是 `OR` 查询条件
-// filters6 = Filters.or(filters4, filters5);
-filters7 = filters1.and(filters2)
-                   .and(filters4.or(filters5));
-filters7 = filters1.and(filters2)
-                   .and(Filters.or(filters4, filters5));
-filters7 = filters1.and(filters2)
-                   .and(Filters.or().eq(Job::getStatus, "Open").lt(Job::getSalary, 30));
-filters7 = new Filters().eq(Job::getTitle, "PM").gt(Job::getGrade, 6)
-                   .and(Filters.or().eq(Job::getStatus, "Open").lt(Job::getSalary, 30));
-// 先创建 `OR` 逻辑，再与其他条件进行 `AND` 合并
-filters7 = filters4.or(filters5)
-                   .and(filters1)
-                   .and(filters2);
-filters7 = Filters.or(filters4, filters5)
-                  .and(filters1)
-                  .and(filters2);
-filters7 = Filters.or().or(filters4).or(filters5)
-                  .and(filters1)
-                  .and(filters2);
-filters7 = Filters.or().eq(Job::getStatus, "Open").lt(Job::getSalary, 30)
-                  .and(filters1)
-                  .and(filters2);
-filters7 = Filters.or().eq(Job::getStatus, "Open").lt(Job::getSalary, 30)
-                  .and(new Filters().eq(Job::getTitle, "PM"))
-                  .and(new Filters().gt(Job::getGrade, 6));
-```
+### 4.5 删除数据
 
-### 2.3 复合查询条件：`OR` 逻辑合并
+删除前，ORM 层会检查数据范围，仅能删除当前用户所属租户的数据。
 
-1. 将 `filters3`, `filters4`, `filters5` 等多个查询对象，合并成一个 `OR` 查询条件，以下写法是等效的：
+## 5 多租户系统的运营平台
 
-```java
-// filters3 = new Filters().eq(Job::getTitle, "PM").gt(Job::getGrade, 6);
-// filters4 = new Filters().eq(Job::getStatus, "Open");
-// filters5 = new Filters().lt(Job::getSalary, 30);
-Filters filters8 = filters3.or(filters4).or(filters5);
-filters8 = Filters.or(filters3, filters4, filters5);
-filters8 = filters3.or(filters4).or(filters5);
-```
+在运营多租户系统时，需要跨租户访问数据，进行租户授权、数据配置、数据分析等操作。
 
-2. `filters8` 等价于以下 `SQL` 语句：
+### 5.1 运营平台不启用多租户隔离
 
-```sql
- WHERE (title = 'PM' AND grade > 6) OR status = 'Open' OR salary < 30
-```
+运营平台需要部署独立的前后端服务，具备独立的访问域名。该系统本身的配置中，不启用多租户，也即 `system.multi-tenancy.enable = false`。
 
-3. `filters8` 更多等效的写法，可以根据上下文变量情况选择性使用：
+### 5.2 运营平台的租户属性
 
-```java
-filters8 = filters3.or(Filters.or(filters4, filters5));
-// 条件之间进行 `OR` 合并，子条件可以是 `AND` 查询条件
-// filters3 = Filters.and(filters1, filters2);
-filters8 = Filters.and(filters1, filters2)
-                  .or(filters4)
-                  .or(filters5);
-filters8 = Filters.and(filters1, filters2)
-                  .or(filters4.or(filters5));
-filters8 = filters4.or(filters5)
-                   .or(Filters.and(filters1, filters2));
-filters8 = filters4.or(filters5)
-                   .or(filters1.and(filters2)));
-// 先创建 `AND` 逻辑，再与其他条件进行 `OR` 合并
-filters8 = new Filters().eq(Job::getTitle, "PM").gt(Job::getGrade, 6)
-                    .or().eq(Job::getStatus, "Open")
-                    .or().lt(Job::getSalary, 30);
-filters8 = new Filters().eq(Job::getTitle, "PM").gt(Job::getGrade, 6)
-                    .or().eq(Job::getStatus, "Open").lt(Job::getSalary, 30);
-filters8 = new Filters().eq(Job::getTitle, "PM").gt(Job::getGrade, 6)
-                    .or(Filters.or().eq(Job::getStatus, "Open").lt(Job::getSalary, 30));
-```
-
-4. Filters 查询条件构造顺序
-   Filters构造时遵循从左到右原则，如 \`\`，解析逻辑如下：
-
-```java
-new Filters().eq(Job::getTitle, "PM").gt(Job::getGrade, 6)
-        .or().eq(Job::getStatus, "Open").lt(Job::getSalary, 30)
-```
-
-> - (1) `new Filters().eq(Job::getTitle, "PM")`，等价于 `title = 'PM'`；
-> - (2) `new Filters().eq(Job::getTitle, "PM").gt(Job::getGrade, 6)`，等价于 `title = 'PM' AND grade > 6`，
->   此时 `filters` 对象为 `AND` 逻辑；
-> - (3) `new Filters().eq(Job::getTitle, "PM").gt(Job::getGrade, 6).or().eq(Job::getStatus, "Open")`，
->   等价于 `(title = 'PM' AND grade > 6) OR status = 'Open'`，
->   此时，`filters` 对象转变为 `OR` 逻辑；
-> - (4). `new Filters().eq(Job::getTitle, "PM").gt(Job::getGrade, 6).or().eq(Job::getStatus, "Open").lt(Job::getSalary, 30)`，
->   为继续增加一个 `OR` 逻辑条件 `.lt(Job::getSalary, 30)`，
->   等价于 `(title = 'PM' AND grade > 6) OR status = 'Open' OR salary < 30`
-
-### 2.4 其它用法
-
-1. 多个 filters 对象合并
-
-```java
-// 假设存在List<Filters> filtersList = Lists.newArrayList(filters1, filters2, filters3);
-Filters filters = Filters.and(filtersList);
-```
-
-## 3. Orders 对象构建
-
-## 4. SubQueries 对象构建
+在运营平台中，租户只是数据授权属性中的一种。也即，数据模型的 tenantId 字段，仅仅作为跨租户授权的数据范围条件。即使数据模型包含 tenantId 字段，也不会受到 ORM 层的多租户限制。
