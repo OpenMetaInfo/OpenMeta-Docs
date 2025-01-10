@@ -1,395 +1,151 @@
-# 构建专业代码应用
+# 快速启动
 
-## EntityService 通用方法
+本章节介绍如何在本地快速启动相关应用程序。
 
-### 创建一条数据，返回 ID
+## 1、拉取代码仓库
 
-```java
-/**
- * 创建一个数据对象并返回ID。
- *
- * @param object 要创建的数据对象
- * @return ID
- */
-K createOne(T object);
+```bash
+git clone https://github.com/OpenMetaInfo/OpenMeta.git
 ```
 
-### 创建一条数据，返回最新数据
+快速启动所需的文件在 `./deploy` 目录下。
 
-```java
-/**
- * 创建一个数据对象，返回带有ID和其他最新字段值的对象。
- *
- * @param object 要创建的数据对象
- * @return 带有ID和其他最新字段值的对象
- */
-T createOneAndReturn(T object);
+## 2、运行最小化应用 mini-app
+
+mini-app 是一个仅依赖 web 模块的最小应用，可以验证通用接口能力，通过通用接口访问系统元数据。
+
+### 2.1 方式一：Docker Compose 运行
+
+```bash
+docker-compose -f deploy/mini-app/docker-compose.yml up -d
 ```
 
-### 批量创建数据，返回 ID 列表
+### 2.2、方式二：源码运行 mini-app 应用
 
-```java
-/**
- * 创建多个数据对象并返回ID列表。
- *
- * @param objects 要创建的数据对象列表
- * @return ID列表
- */
-List<K> createList(List<T> objects);
+- （1）使用 IDE 加载 Maven 模块。
+- （2）配置 application-dev.yml 文件中的 Redis 和数据库连接信息。
+- （3）在 MySQL 数据库执行 ./deploy/mini-app/init_mysql 中的 SQL 脚本。
+- （3）配置 Profile 为 dev，并运行 mini-app 应用的主程序。
+
+### 2.3、调用 OpenAPI 接口
+
+mini-app 应用的 API 路径：`/api/mini`
+
+#### 2.3.1 查看接口文档
+
+mini-app 应用的 Swagger 接口文档地址：
+
+[http://localhost/api/mini/swagger-ui/index.html](http://localhost/api/mini/swagger-ui/index.html)
+
+#### 2.3.2 导入 OpenAPI 接口
+
+本地服务启动后，可以将 OpenAPI 接口文档导入到 ApiFox 等接口工具，mini-app 应用的 OpenAPI 接口文档地址为：
+
+http://localhost/api/mini/v3/api-docs
+
+#### 2.3.3 通过 curl 命令调用
+
+```bash
+curl -X POST 'http://localhost/api/mini/SysField/searchPage' \
+-H 'Content-Type: application/json' \
+-d '{}'
 ```
 
-### 批量创建数据，返回最新数据列表
+## 3、运行 demo-app 应用
 
-```java
-/**
- * 创建多个数据对象，返回带有ID和其他最新字段值的对象列表。
- *
- * @param objects 要创建的数据对象列表
- * @return 带有ID和其他最新字段值的对象列表
- */
-List<T> createListAndReturn(List<T> objects);
+demo-app 是一个实验性应用，依赖了开发过程中新增的 starters，用来验证新增的功能特性。因此，准备工作也会复杂一些。
+
+由于 Demo 应用依赖了 ElasticSearch、RocketMQ、OSS，需要先运行这些服务，或者连接到已有的测试环境。
+
+### 3.1 运行服务依赖
+
+如果已经有 ElasticSearch、RocketMQ、OSS 测试环境，可以跳过运行步骤，直接创建 ES index 、消息 Topics 和 OSS Bucket。
+
+#### 3.1.1 Docker Compose 运行 ElasticSearch
+
+```bash
+docker-compose -f deploy/efk/docker-compose.yml up -d
 ```
 
-### 根据 ID 读取一条对象数据
+Kibana 客户端访问地址： http://localhost:5601
 
-```java
-/**
- * 根据ID读取一个数据对象。
- * ManyToOne/OneToOne/Option/MultiOption字段为原始值。
- *
- * @param id 数据ID
- * @return 数据对象
- */
-T readOne(K id);
+#### 3.1.2 Docker Compose 运行 RocketMQ
+
+```bash
+docker-compose -f deploy/rocketmq/docker-compose.yml up -d
 ```
 
-### 根据 ID 读取对象指定字段数据
+RocketMQ 客户端访问地址： http://localhost:8080
 
-```java
-/**
- * 根据ID读取一个数据对象。
- * 如果未指定字段，则默认读取所有可访问字段。
- * ManyToOne/OneToOne/Option/MultiOption字段为原始值。
- *
- * @param id 数据ID
- * @param fields 要读取的字段列表
- * @return 数据对象
- */
-T readOne(K id, Collection<String> fields);
+#### 3.1.3 Docker Compose 运行 OSS（Minio）
+
+OpenMeta 的 OSS 存储，支持 Minio 和 阿里云 OSS 服务。在测试过程中，为了减少外部依赖，通过运行单机 Minio 服务提供 OSS 服务。
+
+```bash
+docker-compose -f deploy/minio/docker-compose.yml up -d
 ```
 
-### 根据 ID 列表读取对象列表
+- OSS API 地址： http://localhost:9000
+- 管理界面地址 http://localhost:9001
+- Root 用户名: minioadmin
+- Root 密码: minioadmin
 
-```java
-/**
- * 根据ID列表读取多个数据对象。
- * ManyToOne/OneToOne/Option/MultiOption字段为原始值。
- *
- * @param ids 数据ID列表
- * @return 数据对象列表
- */
-List<T> readList(List<K> ids);
+### 3.2 Docker Compose 运行 Demo 应用
+
+#### 3.2.1 配置环境变量
+
+如果连接到已有的 ElasticSearch、RocketMQ 和 OSS，修改 `deploy/demo-app/docker-compose.yml` 中的 `demo-app` 服务的环境变量，指定相关的服务地址。其中 `ROCKETMQ_NAME_SERVER` 需要配置 RocketMQ 服务的 IP 地址。
+
+```yml
+  demo-app:
+    image: openmeta/demo-app:0.7.5
+    ports:
+      - 80:80
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/demo?useUnicode=true&characterEncoding=utf-8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=GMT%2B8
+      - ROCKETMQ_NAME_SERVER=xxxx:9876
+      - SPRING_ELASTICSEARCH_CLUSTER=http://host.docker.internal:9200
+      - SPRING_ELASTICSEARCH_USERNAME=your_username
+      - SPRING_ELASTICSEARCH_PASSWORD=your_password
+      - SPRING_ELASTICSEARCH_INDEX_CHANGELOG=demo_dev_changelog
+      - OSS_TYPE=minio
+      - OSS_ENDPOINT=http://host.docker.internal:9000
+      - OSS_ACCESS_KEY=minioadmin
+      - OSS_SECRET_KEY=minioadmin
+      - OSS_BUCKET=demo-app
+    depends_on:
+      - redis
+      - mysql
 ```
 
-### 根据 ID 列表和指定字段读取对象列表
+#### 3.2.2 Docker Compose 运行 Demo 应用
 
-```java
-/**
- * 根据ID列表读取多个数据对象。
- * 如果未指定字段，则默认读取所有可访问字段。
- * ManyToOne/OneToOne/Option/MultiOption字段为原始值。
- *
- * @param ids 数据ID列表
- * @param fields 要读取的字段列表
- * @return 数据对象列表
- */
-List<T> readList(List<K> ids, Collection<String> fields);
+```bash
+docker-compose -f deploy/demo-app/docker-compose.yml up -d
 ```
 
-### 更新一条数据
+### 3.3、调用 OpenAPI 接口
 
-```java
-/**
- * 根据ID更新一个数据对象。空值不会被忽略。
- *
- * @param object 要更新的数据对象
- * @return true / 异常
- */
-boolean updateOne(T object);
-```
+demo-app 应用的 API 路径：`/api/demo`
 
-### 更新一条数据，指定是否忽略 null 值
+#### 3.3.1 查看接口文档
 
-```java
-/**
- * 根据ID更新一个数据对象。
- *
- * @param object 要更新的数据对象
- * @param ignoreNull 是否在更新时忽略空值
- * @return true / 异常
- */
-boolean updateOne(T object, boolean ignoreNull);
-```
+Demo 应用的 Swagger 接口文档地址：
 
-### 更新一条数据，返回最新对象
+[http://localhost/api/demo/swagger-ui/index.html](http://localhost/api/demo/swagger-ui/index.html)
 
-```java
-/**
- * 根据ID更新一个数据对象。
- *
- * @param object 要更新的数据对象
- * @param ignoreNull 是否在更新时忽略空值
- * @return true / 异常
- */
-T updateOneAndReturn(T object);
-```
+#### 3.3.2 导入 OpenAPI 接口
 
-### 更新一条数据，返回最新对象，指定是否忽略 null 值
+本地服务启动后，可以将 OpenAPI 接口文档导入到 ApiFox 等接口工具，Demo 应用的 OpenAPI 接口文档地址为：
 
-```java
-/**
- * 根据ID更新一个数据对象。
- * 返回从数据库中获取的带有最新字段值的更新对象。
- *
- * @param object 要更新的数据对象
- * @param ignoreNull 是否在更新时忽略空值
- * @return 从数据库中获取的带有最新字段值的更新对象
- */
-T updateOneAndReturn(T object, boolean ignoreNull);
-```
+http://localhost/api/demo/v3/api-docs
 
-### 更新对象列表
+#### 3.3.3 通过 curl 命令调用
 
-```java
-/**
- * 根据ID列表更新多个数据对象。空值不会被忽略。
- *
- * @param objects 要更新的数据对象列表
- * @return true / 异常
- */
-boolean updateList(List<T> objects);
-```
-
-### 更新对象列表，指定是否忽略 null 值
-
-```java
-/**
- * 根据ID列表更新多个数据对象。
- *
- * @param objects 要更新的数据对象列表
- * @param ignoreNull 是否在更新时忽略空值
- * @return true / 异常
- */
-boolean updateList(List<T> objects, boolean ignoreNull);
-```
-
-### 更新对象列表，返回最新对象列表
-
-```java
-/**
- * 根据ID列表更新多个数据对象。空值不会被忽略。
- * 返回从数据库中获取的带有最新字段值的更新对象列表。
- *
- * @param objects 要更新的数据对象列表
- * @return 从数据库中获取的带有最新字段值的更新对象列表
- */
-List<T> updateListAndReturn(List<T> objects);
-```
-
-### 更新对象列表，返回最新对象列表，指定是否忽略 null 值
-
-```java
-/**
- * 根据ID列表更新多个数据对象。
- * 返回从数据库中获取的带有最新字段值的更新对象列表。
- *
- * @param objects 要更新的数据对象列表
- * @param ignoreNull 是否在更新时忽略空值
- * @return 从数据库中获取的带有最新字段值的更新对象列表
- */
-List<T> updateListAndReturn(List<T> objects, boolean ignoreNull);
-```
-
-### 根据 ID 删除一条数据
-
-```java
-/**
- * 根据ID删除一个数据对象。
- *
- * @param id 数据ID
- * @return true / 异常
- */
-boolean deleteOne(K id);
-```
-
-### 根据 ID 列表删除数据列表
-
-```java
-/**
- * 根据ID列表删除多个数据对象。
- *
- * @param ids 数据ID列表
- * @return true / 异常
- */
-boolean deleteList(List<K> ids);
-```
-
-### 根据筛选条件删除多条数据
-
-```java
-/**
- * 根据指定的过滤条件删除数据对象。
- *
- * @param filters 过滤条件
- * @return true / 异常
- */
-boolean deleteByFilters(Filters filters);
-```
-
-### 根据筛选条件获取 ID 列表
-
-```java
-/**
- * 根据过滤条件获取ID列表。
- *
- * @param filters 过滤条件
- * @return ID列表
- */
-List<K> getIds(Filters filters);
-```
-
-### 获取关系型字段的 ID 列表
-
-```java
-/**
- * 获取ManyToOne/OneToOne关系字段的ID。
- *
- * @param filters 过滤条件
- * @param fieldName 关系字段名称
- * @return 关系字段的唯一ID列表
- */
-List<K> getRelatedIds(Filters filters, String fieldName);
-```
-
-### 筛选一条数据
-
-```java
-/**
- * 根据过滤条件查询单个对象。仅供代码使用。
- * 当有多个对象时抛出异常。
- *
- * @param filters 过滤条件对象
- * @return 单个对象
- */
-T searchOne(Filters filters);
-```
-
-### 筛选一条数据
-
-```java
-/**
- * 根据过滤条件查询单个对象。仅供代码使用。
- * 当有多个对象时抛出异常。
- *
- * @param flexQuery FlexQuery对象，可以设置字段、过滤条��、排序等
- * @return 单个对象
- */
-T searchOne(FlexQuery flexQuery);
-```
-
-### 查询数据列表，无筛选条件
-
-```java
-/**
- * 根据过滤条件查询单个对象。仅供代码使用。
- * 当有多个对象时抛出异常。
- *
- * @param flexQuery FlexQuery对象，可以设置字段、过滤条��、排序等
- * @return 单个对象
- */
-List<T> searchList();
-```
-
-### 根据条件查询数据列表
-
-```java
-/**
- * 根据过滤条件查询对象，不分页，仅供代码使用。
- * 如果结果超过MAX_BATCH_SIZE，则记录错误日志，但不抛出异常。
- *
- * @param filters 过滤条件
- * @return 对象列表
- */
-List<T> searchList(Filters filters);
-```
-
-### 根据条件查询数据列表
-
-```java
-/**
- * 根据FlexQuery查询对象，不分页，仅供代码使用。
- * 如果结果超过MAX_BATCH_SIZE，则记录错误日志，但不抛出异常。
- *
- * @param flexQuery FlexQuery对象，可以设置字段、过滤条件、排序等
- * @return 对象列表
- */
-List<T> searchList(FlexQuery flexQuery);
-```
-
-#### 查询并转换为 DTO 对象列表
-
-```java
-/**
- * 根据提供的FlexQuery查询对象并将其映射到指定的DTO类。
- * 如果结果超过MAX_BATCH_SIZE，则记录错误日志，��不抛出异常。
- *
- * @param <R> DTO类的类型
- * @param flexQuery FlexQuery对象，可以设置字段、过滤条件、排序等
- * @param dtoClass 要返回的对象的类
- * @return 指定DTO类的对象列表
- */
-<R> List<R> searchList(FlexQuery flexQuery, Class<R> dtoClass);
-```
-
-### 分页查询数据
-
-```java
-/**
- * 根据FlexQuery查询对象并分页。
- * 页面大小不能超过MAX_BATCH_SIZE。
- *
- * @param flexQuery FlexQuery对象，可以设置字段、过滤条件、排序等
- * @param page 包含分页信息的Page对象
- * @return 包含对象的Page对象
- */
-Page<T> searchPage(FlexQuery flexQuery, Page<T> page);
-```
-
-#### 分页查询并转换为 DTO 对象分页
-
-```java
-/**
- * 根据FlexQuery查询对象并分页，并将其映射到指定的DTO类。
- * 页面大小不能超过MAX_BATCH_SIZE。
- *
- * @param <R> DTO类的类型
- * @param flexQuery FlexQuery对象，可以设置字段、过滤���件、排序等
- * @param page 包含分页信息的Page对象
- * @param dtoClass 要返回的对象的类
- * @return 包含DTO对象的Page对象
- */
-<R> Page<R> searchPage(FlexQuery flexQuery, Page<R> page, Class<R> dtoClass);
-```
-
-### 查询对象数据并将结果按照 ID 分组
-
-```java
-/**
- * 根据提供的过滤条件按ID分组对象。
- * 如果结果超过MAX_BATCH_SIZE，则记录错误日志，但不抛出异常。
- *
- * @param filters 搜索对象时应用的过滤条件
- * @return 对象映射（ID -> 对象）
- */
-Map<Long, T> groupById(Filters filters);
+```bash
+curl -X POST 'http://localhost/api/demo/SysField/searchPage' \
+-H 'Content-Type: application/json' \
+-d '{}'
 ```
