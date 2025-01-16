@@ -187,7 +187,7 @@ List<K> getIds(Filters filters);
 boolean updateOne(T entity);
 ```
 
-### updateOne (可选择忽略 null)
+### updateOne (可选忽略 null)
 ```java
 /**
  * 根据实体 ID 更新已有实体，可选择是否忽略空值（null）。
@@ -211,7 +211,7 @@ boolean updateOne(T entity, boolean ignoreNull);
 T updateOneAndFetch(T entity);
 ```
 
-### updateOneAndFetch (可选择忽略 null)
+### updateOneAndFetch (可选忽略 null)
 ```java
 /**
  * 根据实体 ID 更新已有实体，可选择是否忽略空值（null）。
@@ -235,7 +235,7 @@ T updateOneAndFetch(T entity, boolean ignoreNull);
 boolean updateList(List<T> entities);
 ```
 
-### updateList (可选择忽略 null)
+### updateList (可选忽略 null)
 ```java
 /**
  * 批量更新多个实体（根据 ID），可选择是否忽略空值（null）。
@@ -259,7 +259,7 @@ boolean updateList(List<T> entities, boolean ignoreNull);
 List<T> updateListAndFetch(List<T> entities);
 ```
 
-### updateListAndFetch (可选择忽略 null)
+### updateListAndFetch (可选忽略 null)
 ```java
 /**
  * 批量更新多个实体（根据 ID），可选择是否忽略空值（null）。
@@ -382,7 +382,7 @@ List<T> searchList(FlexQuery flexQuery);
 ```java
 /**
  * 基于 FlexQuery 执行分页查询。
- * <p>分页大小不能超过 MAX_BATCH_SIZE。</p>
+ * 分页大小不能超过 MAX_BATCH_SIZE。
  *
  * @param flexQuery 包含字段、过滤条件、排序等信息的 FlexQuery 对象
  * @param page 包含分页信息的 Page 对象
@@ -395,7 +395,7 @@ Page<T> searchPage(FlexQuery flexQuery, Page<T> page);
 ```java
 /**
  * 基于 FlexQuery 执行分页查询，并将结果映射为指定的 DTO 类型。
- * <p>分页大小不能超过 MAX_BATCH_SIZE。</p>
+ * 分页大小不能超过 MAX_BATCH_SIZE。
  *
  * @param <R> DTO 类型
  * @param flexQuery 包含字段、过滤条件、排序等信息的 FlexQuery 对象
@@ -410,7 +410,7 @@ Page<T> searchPage(FlexQuery flexQuery, Page<T> page);
 ```java
 /**
  * 根据过滤条件查询实体，并以实体 ID 为键进行分组。
- * <p>如果结果数量超过 MAX_BATCH_SIZE，会记录错误日志，但不抛出异常。</p>
+ * 如果结果数量超过 MAX_BATCH_SIZE，会记录错误日志，但不抛出异常。
  *
  * @param filters 用于查找实体的过滤条件
  * @return 一个 Map，键为实体 ID，值为对应的实体
