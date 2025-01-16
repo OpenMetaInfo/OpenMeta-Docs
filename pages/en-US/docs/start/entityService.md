@@ -10,6 +10,18 @@ For more details, refer to the [Query Conditions](develop/query) sections.
 ## 2. FlexQuery
 
 ## 3. `EntityService` interface methods
+
+### count
+```java
+/**
+ * Counts the number of rows matching the given filters.
+ *
+ * @param filters filtering conditions
+ * @return the total count of matching rows
+ */
+K createOne(T entity);
+```
+
 ### createOne
 ```java
 /**
@@ -18,7 +30,7 @@ For more details, refer to the [Query Conditions](develop/query) sections.
  * @param entity the entity to be created
  * @return the ID of the newly created entity
  */
-K createOne(T entity);
+Long count(Filters filters);
 ```
 
 ### createOneAndFetch
@@ -132,6 +144,19 @@ List<T> getByIds(List<K> ids, SubQueries subQueries);
 List<T> getByIds(List<K> ids, Collection<String> fields);
 ```
 
+### getDistinctFieldValue
+```java
+/**
+ * Get distinct values for the specified field, filtered by the given conditions.
+ *
+ * @param <V> the type of the field's value
+ * @param fieldReference the field reference to get the value from
+ * @param filters optional filtering conditions
+ * @return a list of distinct field values
+ */
+<V extends Serializable, R> List<V> getDistinctFieldValue(SFunction<T, R> fieldReference, Filters filters);
+```
+
 ### getFieldValue
 ```java
 /**
@@ -139,10 +164,10 @@ List<T> getByIds(List<K> ids, Collection<String> fields);
  * The ManyToOne/OneToOne/Option/MultiOption fields are original values.
  *
  * @param id data id
- * @param method field method, Lambda expression, method reference passing parameters
+ * @param fieldReference field reference to get the value from
  * @return field value
  */
-<V extends Serializable, R> V getFieldValue(K id, SFunction<T, R> method);
+<V extends Serializable, R> V getFieldValue(K id, SFunction<T, R> fieldReference);
 ```
 
 ### getIds
@@ -164,10 +189,10 @@ List<K> getIds(Filters filters);
  * @param <EK> the type of the related entity ID, extending Serializable
  * @param <R> the return type of the method reference
  * @param filters the filters to apply
- * @param method field method, Lambda expression, method reference passing parameters
+ * @param fieldReference the field reference to get the related entity ID
  * @return distinct ids for relational field
  */
-<EK extends Serializable, R> List<EK> getRelatedIds(Filters filters, SFunction<T, R> method);
+<EK extends Serializable, R> List<EK> getRelatedIds(Filters filters, SFunction<T, R> fieldReference);
 ```
 
 ### getRelatedIds (with fieldName)
@@ -277,6 +302,20 @@ List<T> updateListAndFetch(List<T> entities);
  * @return a list of updated entities with the latest field values
  */
 List<T> updateListAndFetch(List<T> entities, boolean ignoreNull);
+```
+
+### updateByFilter
+```java
+/**
+ * Performs a batch update of rows that match the provided filters,
+ * updating the fields specified in the value map.
+ * <p>If no filters are specified, all data visible to the current user might be updated.</p>
+ *
+ * @param filters optional filter criteria
+ * @param value a map of field-value pairs to update
+ * @return the number of rows affected
+ */
+Integer updateByFilter(Filters filters, Map<String, Object> value);
 ```
 
 ### deleteById
