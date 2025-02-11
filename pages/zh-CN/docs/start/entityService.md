@@ -1,6 +1,18 @@
 # 构建专业代码应用
 
 ## EntityService 通用方法
+
+### count
+```java
+/**
+ * 统计符合给定过滤条件的行数。
+ *
+ * @param filters 过滤条件
+ * @return 符合条件的总行数
+ */
+Long count(Filters filters);
+```
+
 ### createOne
 ```java
 /**
@@ -121,6 +133,19 @@ List<T> getByIds(List<K> ids, SubQueries subQueries);
  * @return 实体列表
  */
 List<T> getByIds(List<K> ids, Collection<String> fields);
+```
+
+### getDistinctFieldValue
+```java
+/**
+ * 获取指定字段的唯一值列表，并根据给定条件进行过滤。
+ *
+ * @param <V> 字段值的类型
+ * @param fieldReference 要获取值的字段引用
+ * @param filters 可选的过滤条件
+ * @return 唯一字段值的列表
+ */
+<V extends Serializable, R> List<V> getDistinctFieldValue(SFunction<T, R> fieldReference, Filters filters);
 ```
 
 ### getFieldValue
@@ -270,6 +295,20 @@ List<T> updateListAndFetch(List<T> entities);
  * @return 更新后的实体列表（包含最新字段值）
  */
 List<T> updateListAndFetch(List<T> entities, boolean ignoreNull);
+```
+
+### updateByFilter
+```java
+/**
+ * 对符合指定过滤条件的行进行批量更新，
+ * 更新值由字段-值映射提供。
+ * <p>如果未指定过滤条件，则可能会更新当前用户可见的所有数据。</p>
+ *
+ * @param filters 可选的过滤条件
+ * @param value 要更新的字段-值映射
+ * @return 受影响的行数
+ */
+Integer updateByFilter(Filters filters, Map<String, Object> value);
 ```
 
 ### deleteById
