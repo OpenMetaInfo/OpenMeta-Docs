@@ -29,9 +29,9 @@
 | 19 | expression | String | 计算表达式 |  |
 | 20 | cascadedField | String | 级联字段 | 关系属性 |
 | 21 | relatedModel | String | 关联模型 | 关系属性 |
-| 22 | relatedField | String | 关联字段 | 关系属性 |
-| 23 | inverseLinkField | String | 反向连接字段 | 关系属性 |
-| 24 | displayName | MultiString | 关系型字段显示名称 | 关系属性 |
+| 22 | middleModel | String | 中间模型 | 关系属性 |
+| 23 | relatedField | String | 关联字段 | 关系属性 |
+| 24 | inverseLinkField | String | 反向连接字段 | 关系属性 |
 | 25 | filters | String | 关系型字段过滤条件 | 关系属性 |
 | 26 | columnName | String | 数据表列名 | 只读 |
 | 27 | description | String | 字段描述 |  |
@@ -162,19 +162,19 @@ OpenMeta 引用了 **[AviatorScript](https://github.com/killme2008/aviatorscript
 
 关系型字段的关联模型，即 OneToOne、ManyToOne、OneToMany、ManyToMany 字段类型的关联模型名。其中，当字段类型为 ManyToMany 时，这个关联模型是中间表的模型名。
 
-### 2.22 `relatedField` 关联字段
+### 2.22 `middleModel` 中间模型
 
-当字段类型为 OneToMany、ManyToMany 时，关联模型引用当前模型的字段名。OneToOne、ManyToOne 时默认该属性为关联模型的 `id`。
+ManyToMany 字段存储左右两个模型关系数据的中间模型，也即中间表。
 
-### 2.23 `inverseLinkField` 反向连接字段
+### 2.23 `relatedField` 关联字段
+
+* 当字段类型为 OneToMany 时，关联模型存储当前模型 id 的字段名。
+* 当字段类型为 ManyToMany 时，中间模型存储当前模型 id 的字段名。
+* OneToOne、ManyToOne 时默认该属性为关联模型的 `id`。
+
+### 2.24 `inverseLinkField` 反向连接字段
 
 当字段类型为 `ManyToMany` 时，中间表关联到目标表的字段名。
-
-### 2.24 `displayName` 关系型字段显示名称
-
-针对 `OneToOne、ManyToOne、ManyToMany、OneToMany` 关系型字段设置字段级别的 `displayName` 属性，配置关联模型数据的显示名称。
-
-当关系型字段本身未配置 `displayName` 属性时，则使用关联模型的 `displayName` 配置。
 
 ### 2.25 `filters` 关系型字段过滤条件
 

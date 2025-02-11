@@ -29,9 +29,9 @@ Field metadata is a collection of descriptive information about model fields. It
 | 19 | expression | String | Computation expression |  |
 | 20 | cascadedField | String | Cascaded field | Relationship attribute |
 | 21 | relatedModel | String | Related model | Relationship attribute |
-| 22 | relatedField | String | Related field | Relationship attribute |
-| 23 | inverseLinkField | String | Inverse link field | Relationship attribute |
-| 24 | displayName | MultiString | Display name for relational fields | Relationship attribute |
+| 22 | middleModel | String | Middle model | Relationship attribute |
+| 23 | relatedField | String | Related field | Relationship attribute |
+| 24 | inverseLinkField | String | Inverse link field | Relationship attribute |
 | 25 | filters | String | Filtering conditions for relational fields | Relationship attribute |
 | 26 | columnName | String | Data table column name | Read-only |
 | 27 | description | String | Field description |  |
@@ -148,7 +148,7 @@ OpenMeta uses **[AviatorScript](https://github.com/killme2008/aviatorscript)** a
 
 ### 2.20 `cascadedField` Cascaded Field
 
-Refers to the values of fields in associated models through OneToOne/ManyToOne field references. The configuration format is dot-separated cascaded fields, with the left side being the OneToOne/ManyToOne field name of the current model, and the right side being the field name of the associated model, such as `productId.productName`.
+Refers to the values of fields in related models through OneToOne/ManyToOne field references. The configuration format is dot-separated cascaded fields, with the left side being the OneToOne/ManyToOne field name of the current model, and the right side being the field name of the related model, such as `productId.productName`.
 
 For `dynamic=false` cascaded fields, recalculation is triggered automatically when the dependent OneToOne/ManyToOne field changes.
 
@@ -160,19 +160,19 @@ This cascade is a logical cascade, not a database cascade.
 
 The associated model for relational fields, i.e., the model name for OneToOne, ManyToOne, OneToMany, and ManyToMany field types. For ManyToMany field types, this associated model is the model name of the intermediate table.
 
-### 2.22 `relatedField` Related Field
+### 2.22 `middleModel` Middle Model
 
-When the field type is OneToMany or ManyToMany, the field in the related model that references the current model. For OneToOne and ManyToOne, the default value of this property is the `id` of the related model.
+The ManyToMany field stores the middle model for the relationship data between the left and right models, which is also the intermediate table.
 
-### 2.23 `inverseLinkField` Inverse Link Field
+### 2.23 `relatedField` Related Field
+
+* When the field type is OneToMany, the related model stores the field name of the current model id.
+* When the field type is ManyToMany, the middle model stores the field name of the current model id.
+* In the case of OneToOne and ManyToOne, this attribute defaults to the id of the related model.
+
+### 2.24 `inverseLinkField` Inverse Link Field
 
 When the field type is ManyToMany, the field name in the target table that is linked to the middle table.
-
-### 2.24 `displayName` Display Name for Relational Fields
-
-Set the field-level `displayName` property for OneToOne, ManyToOne, ManyToMany, OneToMany relational fields to configure the display name of the related model data.
-
-If not configured at the relational fields, it uses the `displayName` configuration of the related model.
 
 ### 2.25 `filters` Filtering Conditions for Relational Fields
 
