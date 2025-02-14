@@ -29,12 +29,13 @@
 | 19 | expression | String | 计算表达式 |  |
 | 20 | cascadedField | String | 级联字段 | 关系属性 |
 | 21 | relatedModel | String | 关联模型 | 关系属性 |
-| 22 | middleModel | String | 中间模型 | 关系属性 |
-| 23 | relatedField | String | 关联字段 | 关系属性 |
-| 24 | inverseLinkField | String | 反向连接字段 | 关系属性 |
-| 25 | filters | String | 关系型字段过滤条件 | 关系属性 |
-| 26 | columnName | String | 数据表列名 | 只读 |
-| 27 | description | String | 字段描述 |  |
+| 22 | relatedField | String | 关联字段 | OneToMany 的 Many 端字段名 |
+| 23 | jointModel | String | ManyToMany 连接模型 | 关系属性 |
+| 24 | jointLeft | String | 连接模型左侧字段名 | 存储左侧模型外键 |
+| 25 | jointRight | String | 连接模型右侧字段名 | 存储右侧模型外键 |
+| 26 | filters | String | 关系型字段过滤条件 | 关系属性 |
+| 27 | columnName | String | 数据表列名 | 只读 |
+| 28 | description | String | 字段描述 |  |
 
 ### 2.1 `labelName` 字段标签
 
@@ -156,7 +157,7 @@ OpenMeta 引用了 **[AviatorScript](https://github.com/killme2008/aviatorscript
 
 `dynamic=true` 的级联字段，表示级联值并不存储在数据库中，当读取该级联字段时，自动级联读取最新的字段值。
 
-此级联为逻辑级联，非数据库级联。
+此级联为逻辑级联，非数据库级联。仅 OneToOne/ManyToOne 字段支持级联取值。
 
 ### 2.21 `relatedModel` 关联模型
 
