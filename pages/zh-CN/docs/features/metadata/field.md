@@ -1,10 +1,8 @@
 # 字段元数据
 
-## 1、字段元数据介绍
-
 字段元数据是模型字段的描述信息的集合，它定义了该模型在业务场景中用到的各种字段，以及每个字段的类型、长度、默认值、必填、只读、关联关系等等。通过这些元数据，系统可以按照统一的模式控制数据的响应、处理和交互，同时也可以对通用需求进行抽象处理，确保数据的一致性、准确性和完整性。
 
-**OpenMeta 内置的字段类型如下：**
+## 1、字段类型介绍
 
 | 序号 | 类型 | 类型名称 | 默认值 | 描述 |
 | --- | --- | --- | --- | --- |
@@ -24,14 +22,16 @@
 | 14 | JSON | JSON |  | JSON字符串存储 |
 | 15 | Filters | 筛选条件 |  | 存储中缀表达式筛选条件 |
 | 16 | Orders | 排序条件 |  | 存储多字段排序条件 |
-| 17 | OneToOne | 一对一 |  | `relatedModel` |
-| 18 | ManyToOne | 多对一 |  | `relatedModel` |
-| 19 | OneToMany | 一对多 |  | `relatedModel` + `relatedField` |
-| 20 | ManyToMany | 多对多 |  | `relatedModel` + `jointModel` + `jointLeft` + `jointRight`|
+| 17 | OneToOne | 一对一 |  | 配置 `relatedModel` |
+| 18 | ManyToOne | 多对一 |  | 配置 `relatedModel` |
+| 19 | OneToMany | 一对多 |  | 配置 `relatedModel` + `relatedField` |
+| 20 | ManyToMany | 多对多 |  | 配置 `relatedModel` + `jointModel` + `jointLeft` + `jointRight`|
 
 > 备注：
 	1. 字段默认值，根据字段类型，自动设零值。
 	2. OneToOne、ManyToOne、OneToMany、ManyToMany 字段涉及到的外键为逻辑外键，非数据库物理外键。
+
+**需要补充说明的字段类型如下：**
 
 ### 1.1 `Date` 日期
 
