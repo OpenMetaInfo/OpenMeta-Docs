@@ -4,6 +4,108 @@
 
 字段元数据是模型字段的描述信息的集合，它定义了该模型在业务场景中用到的各种字段，以及每个字段的类型、长度、默认值、必填、只读、关联关系等等。通过这些元数据，系统可以按照统一的模式控制数据的响应、处理和交互，同时也可以对通用需求进行抽象处理，确保数据的一致性、准确性和完整性。
 
+**OpenMeta 内置的字段类型如下：**
+
+| 序号 | 类型 | 类型名称 | 默认值 | 描述 |
+| --- | --- | --- | --- | --- |
+| 1 | String | 字符串 | “” | 通过 `length` 配置字符串长度。|
+| 2 | Integer | 整数 | 0 | 通过 `length` 配置整数位数。|
+| 3 | Long | 长整数 | 0L |  |
+| 4 | Double | 小数 | 0.00 | 普通小数，用于可接受精度损失的计算场景。|
+| 5 | BigDecimal | 精确小数 | “0” | 用于金额、货币、汇率等高精度计算场景。 |
+| 6 | Boolean | 布尔字段 | false |  |
+| 7 | Date | 日期字段 |  | 格式 `yyyy-MM-dd`，如 `2025-02-14` |
+| 8 | DateTime | 日期时间 |  | 格式 `yyyy-MM-dd HH:mm:ss`，如 `2024-02-29 19:15:20` |
+| 9 | Option | 单选字段 |  |  |
+| 10 | MultiOption | 多选字段 | [] |  |
+| 11 | MultiString | 字符串列表 | [] |  |
+| 12 | File | 单个文件 |  | 上传并绑定一个文件 |
+| 13 | MultiFile | 多个文件 |  | 上传并绑定多个文件 |
+| 14 | JSON | JSON |  | JSON字符串存储 |
+| 15 | Filters | 筛选条件 |  | 存储中缀表达式筛选条件 |
+| 16 | Orders | 排序条件 |  | 存储多字段排序条件 |
+| 17 | OneToOne | 一对一 |  | `relatedModel` |
+| 18 | ManyToOne | 多对一 |  | `relatedModel` |
+| 19 | OneToMany | 一对多 |  | `relatedModel` + `relatedField` |
+| 20 | ManyToMany | 多对多 |  | `relatedModel` + `jointModel` + `jointLeft` + `jointRight`|
+
+> 备注：
+	1. 字段默认值，根据字段类型，自动设零值。
+	2. OneToOne、ManyToOne、OneToMany、ManyToMany 字段涉及到的外键为逻辑外键，非数据库物理外键。
+
+### 1.1 `Date` 日期
+
+代码中为 `LocalDate` 对象，展示格式为 `yyyy-MM-dd` ，如 `2024-02-29` 。
+
+### 1.2 `DateTime` 日期时间
+
+适用于精确到秒的日期时间类型，代码中为 `LocalDateTime` 对象，数据库中存储为时间戳，展示格式为 `yyyy-MM-dd HH:mm:ss` ，如 `2024-02-29 19:15:20` 。
+
+### 1.3 `Option` 单选
+
+单选字段，必须配置 `OptionCode`  属性，即选项集编码。
+
+在保存单选字段的值时，实际传递和存储的是选项条目的编码。
+
+API 获取单选字段的值时，默认返回 `[itemCode, itemName]` 格式，也即同时返回条目的编码和名称。
+
+选项集的配置和使用，具体参考 [选项集](option) 章节
+
+### 1.4 `MultiOption` 多选
+
+多选字段跟单选字段的区别是，多选字段允许从同一个选项集中，选择多个选项，保存时传递选项的编码字符串列表，并在数据库中存储的多个选项条目的编码，使用 `,` 间隔。
+
+API 读取多选字段的值时，默认返回 `[[itemCode, itemName], ... ]` 格式，也即多个选项的编码和名称。
+
+### 1.5 `MultiString` 字符串列表
+
+适用于通过单字段存储多个字符串值，程序中处理字符串列表对象，在数据库中，使用 `,` 间隔存储。
+
+### 1.6 `JSON` JSON 字段
+
+JSON 格式字段，一般仅用于 JSON 数据存储和对象转换。需要针对 JSON 数据进行索引和条件查询时，需要手工处理。
+
+### 1.7 `Filter` 筛选条件字段
+
+仅用于存储和转换筛选条件对象，在数据库中以字符串格式存储。
+
+### 1.8 `OneToOne` 一对一
+
+关系型字段，需配置 `relatedModel` 和 `relatedField` 属性。选择的数据具有唯一性。
+
+### 1.9 `ManyToOne`  多对一
+
+关系型字段，需配置 `relatedModel` 和 `relatedField` 属性。
+
+### 1.10 `OneToMany` 一对多
+
+OneToMany 字段的数据，一般在客户端针对单条数据进行新增、编辑、删除，调用 Many 端的模型接口即可。
+
+针对批量编辑 OneToMany 字段值的场景：
+
+（1）字段值为 `[]`，空列表表示全部删除历史记录
+
+（2）字段值不为空时， `[{...}, {...}]` 即 Many 端的数据列表结构时，自动识别出 Many 端的新增、编辑和删除的记录，并进行相应的处理。
+
+### 1.11 `ManyToMany` 多对多
+
+（1） `ManyToMany` 字段的更新
+
+在 Create/Update 场景中，ManyToMany 字段的值传参关联模型的 id 列表。如 Update 请求:
+
+```json
+{
+	"id": 12,
+	"attendeeIds": [1, 2, 3]
+}
+```
+
+程序自动识别被删除的关系。
+
+（2） `ManyToMany` 字段的级联搜索
+
+应用场景：通过关联表字段的筛选条件，过滤当前表的数据。具体参考 [查询条件](../../develop/query) 章节。
+
 ## 2、字段元数据属性
 
 | 序号 | 字段信息 | 数据类型 | 描述 | 备注 |
@@ -30,7 +132,7 @@
 | 20 | cascadedField | String | 级联字段 | 关系属性 |
 | 21 | relatedModel | String | 关联模型 | 关系属性 |
 | 22 | relatedField | String | 关联字段 | OneToMany 的 Many 端字段名 |
-| 23 | jointModel | String | ManyToMany 连接模型 | 关系属性 |
+| 23 | jointModel | String | ManyToMany 连接模型 | 中间模型 |
 | 24 | jointLeft | String | 连接模型左侧字段名 | 存储左侧模型外键 |
 | 25 | jointRight | String | 连接模型右侧字段名 | 存储右侧模型外键 |
 | 26 | filters | String | 关系型字段过滤条件 | 关系属性 |
@@ -161,155 +263,43 @@ OpenMeta 引用了 **[AviatorScript](https://github.com/killme2008/aviatorscript
 
 ### 2.21 `relatedModel` 关联模型
 
-关系型字段的关联模型，即 OneToOne、ManyToOne、OneToMany、ManyToMany 字段类型的关联模型名。其中，当字段类型为 ManyToMany 时，这个关联模型是中间表的模型名。
+关系型字段的关联模型，即 OneToOne、ManyToOne、OneToMany、ManyToMany 字段类型的关联模型名。
 
-### 2.22 `middleModel` 中间模型
+### 2.22 `relatedField` 关联字段
 
-ManyToMany 字段存储左右两个模型关系数据的中间模型，也即中间表。
-
-### 2.23 `relatedField` 关联字段
-
-* 当字段类型为 OneToMany 时，关联模型存储当前模型 id 的字段名。
-* 当字段类型为 ManyToMany 时，中间模型存储当前模型 id 的字段名。
+* 当字段类型为 OneToMany 时，填写关联模型中存储当前模型外键的字段名，且不能为空。
 * OneToOne、ManyToOne 时默认该属性为关联模型的 `id`。
 
-### 2.24 `inverseLinkField` 反向连接字段
+### 2.23 `jointModel` ManyToMany 连接模型
 
-当字段类型为 `ManyToMany` 时，中间表关联到目标表的字段名。
+当字段类型为 ManyToMany 时，jointModel 不能为空。jointModel 配置的是连接模型，也即中间模型，存储的是左右两个模型的映射关系数据。
 
-### 2.25 `filters` 关系型字段过滤条件
+在查询时，先到 `jointModel` 连接模型查询映射关系数据，再到 `relatedModel` 查询关联模型的字段数据，从而实现多对多关系的查询。
+
+默认值规则：根据左右两个模型名，以及 `Rel` 标识，自动拼接生成连接模型名，如 `User` + `Role` + `Rel` = `UserRoleRel`。
+
+### 2.24 `jointLeft` 连接模型左侧字段名
+
+当字段类型为 `ManyToMany` 时，配置连接模型存储左侧模型外键的字段名。
+
+默认值规则：将左侧模型名首字母转换为小写，再拼接 `Id` ，如 `User` + `Id` = `userId`。
+
+### 2.25 `jointRight` 连接模型右侧字段名
+
+当字段类型为 `ManyToMany` 时，配置连接模型存储右侧模型外键的字段名。
+
+默认值规则：将右侧模型名首字母转换为小写，再拼接 `Id` ，如 `Role` + `Id` = `roleId`。
+
+### 2.26 `filters` 关系型字段过滤条件
 
 针对 `OneToOne、ManyToOne` 关系型字段的基础筛选条件，用于根据业务场景对可选数据进行过滤，客户端在执行查询时可携带的固定筛选条件，与用户搜索条件是 `AND` 关系。
 
-### 2.26 `columnName` 数据表列名
+### 2.27 `columnName` 数据表列名
 
 只读字段，字段对应的数据表列名，由字段名自动转换，如 `unit_price`。
 
 字段名变化时，默认同步修改数据表列名。可以通过全局 DDL 开关配置关闭自动修改数据表，以满足通过其它方式提交 DDL 的场景。
 
-### 2.27 `description` 字段描述
+### 2.28 `description` 字段描述
 
 字段的业务描述。
-
-## 3 字段类型 FieldType
-
-| 序号 | 类型 | 类型名称 | 默认值 |
-| --- | --- | --- | --- |
-| 1 | String | 字符串 | “” |
-| 2 | Integer | 整数 | 0 |
-| 3 | Long | 长整数 | 0L |
-| 4 | Double | 小数 | 0.00 |
-| 5 | BigDecimal | 精确小数 | “0” |
-| 6 | Boolean | 是否 | false |
-| 7 | Date | 日期 |  |
-| 8 | DateTime | 日期时间 |  |
-| 9 | Option | 单选 |  |
-| 10 | MultiOption | 多选 | [] |
-| 11 | MultiString | 字符串列表 | [] |
-| 12 | JSON | JSON |  |
-| 13 | Filter | Filter |  |
-| 14 | OneToOne | 一对一 |  |
-| 15 | ManyToOne | 多对一 |  |
-| 16 | OneToMany | 一对多 |  |
-| 17 | ManyToMany | 多对多 |  |
-
-
-* 字段默认值，根据字段类型，自动设零值。
-* OneToOne、ManyToOne 的外键为逻辑外键，非数据库物理外键。
-
-### 3.1 `String` 字符串
-
-字符串类型的字段，使用 `length` 配置字符串长度。
-
-### 3.2 `Integer` 整数
-
-整数类型字段，使用 `length` 配置整数位数。
-
-### 3.3 `Long` 长整数
-
-长整数类型。
-
-### 3.4 `Double` 小数
-
-普通小数类型，应用于可接受精度损失的计算场景。
-
-### 3.5 `BigDecimal` 精确小数
-
-精确小数，应用与高精度计算场景，应用于金额、货币、汇率等计算场景。
-
-### 3.6 `Boolean` 是否
-
-布尔类型字段。
-
-### 3.7 `Date` 日期
-
-日期类型， `LocalDate` 对象，展示格式为 `yyyy-MM-dd` ，如 `2024-02-29` 。
-
-### 3.8 `DateTime` 日期时间
-
-适用于精确到秒的日期时间类型，`LocalDateTime` 对象，数据库中存储为时间戳，展示格式为 `yyyy-MM-dd HH:mm:ss` ，如 `2024-02-29 19:15:20` 。
-
-### 3.9 `Option` 单选
-
-单选字段，必须配置 `OptionCode`  属性，即选项集编码。
-
-在保存单选字段的值时，实际传递和存储的是选项条目的编码。
-
-API 获取单选字段的值时，默认返回 `[itemCode, itemName]` 格式，也即同时返回条目的编码和名称。
-
-选项集的配置和使用，具体参考 [选项集](option) 章节
-
-### 3.10 `MultiOption` 多选
-
-多选字段跟单选字段的区别是，多选字段允许从同一个选项集中，选择多个选项，保存时传递选项的编码字符串列表，并在数据库中存储的多个选项条目的编码，使用 `,` 间隔。
-
-API 读取多选字段的值时，默认返回 `[[itemCode, itemName], ... ]` 格式，也即多个选项的编码和名称。
-
-### 3.11 `MultiString` 字符串列表
-
-适用于通过单字段存储多个字符串值，程序中处理字符串列表对象，在数据库中，使用 `,` 间隔存储。
-
-### 3.12 `JSON` JSON 字段
-
-JSON 格式字段，一般仅用于 JSON 数据存储和对象转换。需要针对 JSON 数据进行索引和条件查询时，需要手工处理。
-
-### 3.13 `Filter` 筛选条件字段
-
-仅用于存储和转换筛选条件对象，在数据库中以字符串格式存储。
-
-### 3.14 `OneToOne` 一对一
-
-关系型字段，需配置 `relatedModel` 和 `relatedField` 属性。选择的数据具有唯一性。
-
-### 3.15 `ManyToOne`  多对一
-
-关系型字段，需配置 `relatedModel` 和 `relatedField` 属性。
-
-### 3.16 `OneToMany` 一对多
-
-OneToMany 字段的数据，一般在客户端针对单条数据进行新增、编辑、删除，调用 Many 端的模型接口即可。
-
-针对批量编辑 OneToMany 字段值的场景：
-
-（1）字段值为 `[]`，空列表表示全部删除历史记录
-
-（2）字段值不为空时， `[{...}, {...}]` 即 Many 端的数据列表结构时，自动识别出 Many 端的新增、编辑和删除的记录，并进行相应的处理。
-
-### 3.17 `ManyToMany` 多对多
-
-（1） `ManyToMany` 字段的更新
-
-在 Create/Update 场景中，ManyToMany 字段的值传参关联模型的 id 列表。如 Update 请求:
-
-```json
-{
-	"id": 12,
-	"attendeeIds": [1, 2, 3]
-}
-```
-
-程序自动识别被删除的关系。
-
-（2） `ManyToMany` 字段的级联搜索
-
-应用场景：通过关联表字段的筛选条件，过滤当前表的数据。具体参考 [查询条件](../../develop/query) 章节。
