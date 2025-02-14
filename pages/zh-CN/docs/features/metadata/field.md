@@ -17,19 +17,20 @@
 | 9 | Option | 单选字段 |  |  |
 | 10 | MultiOption | 多选字段 | [] |  |
 | 11 | MultiString | 字符串列表 | [] |  |
-| 12 | File | 单个文件 |  | 上传并绑定一个文件 |
-| 13 | MultiFile | 多个文件 |  | 上传并绑定多个文件 |
+| 12 | File | 单个文件 |  | 虚拟字段，上传并绑定一个文件 |
+| 13 | MultiFile | 多个文件 |  | 虚拟字段，上传并绑定多个文件 |
 | 14 | JSON | JSON |  | JSON字符串存储 |
 | 15 | Filters | 筛选条件 |  | 存储中缀表达式筛选条件 |
 | 16 | Orders | 排序条件 |  | 存储多字段排序条件 |
 | 17 | OneToOne | 一对一 |  | 配置 `relatedModel` |
 | 18 | ManyToOne | 多对一 |  | 配置 `relatedModel` |
-| 19 | OneToMany | 一对多 |  | 配置 `relatedModel` + `relatedField` |
-| 20 | ManyToMany | 多对多 |  | 配置 `relatedModel` + `jointModel` + `jointLeft` + `jointRight`|
+| 19 | OneToMany | 一对多 |  | 虚拟字段，配置 `relatedModel` + `relatedField` |
+| 20 | ManyToMany | 多对多 |  | 虚拟字段，配置 `relatedModel` + `jointModel` + `jointLeft` + `jointRight`|
 
 > 备注：
 	1. 字段默认值，根据字段类型，自动设零值。
 	2. OneToOne、ManyToOne、OneToMany、ManyToMany 字段涉及到的外键为逻辑外键，非数据库物理外键。
+	3. 虚拟字段，在当前数据表中并不存在，操作虚拟字段时，框架自动进行相关处理。
 
 **需要补充说明的字段类型如下：**
 
@@ -59,25 +60,35 @@ API 读取多选字段的值时，默认返回 `[[itemCode, itemName], ... ]` �
 
 ### 1.5 `MultiString` 字符串列表
 
-适用于通过单字段存储多个字符串值，程序中处理字符串列表对象，在数据库中，使用 `,` 间隔存储。
+适用于通过单字段存储多个字符串值，程序中处理字符串列表对象，在数据库中使用 `,` 间隔存储。
 
-### 1.6 `JSON` JSON 字段
+### 1.6 `File` File 字段
+该字段类型，用于上传和绑定一个文件。文件自动存储在 FileRecord 模型。
+
+### 1.7 `MultiFile` MultiFile 字段
+该字段类型，用于上传和绑定多个文件。文件自动存储在 FileRecord 模型。
+
+### 1.8 `JSON` JSON 字段
 
 JSON 格式字段，一般仅用于 JSON 数据存储和对象转换。需要针对 JSON 数据进行索引和条件查询时，需要手工处理。
 
-### 1.7 `Filter` 筛选条件字段
+### 1.9 `Filter` 筛选条件字段
 
-仅用于存储和转换筛选条件对象，在数据库中以字符串格式存储。
+仅用于存储筛选条件对象 Filters 的 JSON 字符串。
 
-### 1.8 `OneToOne` 一对一
+### 1.9 `Orders` 筛选条件字段
+
+仅用于存储排序条件对象 Orders 的 JSON 字符串。
+
+### 1.10 `OneToOne` 一对一
 
 关系型字段，需配置 `relatedModel` 和 `relatedField` 属性。选择的数据具有唯一性。
 
-### 1.9 `ManyToOne`  多对一
+### 1.11 `ManyToOne`  多对一
 
 关系型字段，需配置 `relatedModel` 和 `relatedField` 属性。
 
-### 1.10 `OneToMany` 一对多
+### 1.12 `OneToMany` 一对多
 
 OneToMany 字段的数据，一般在客户端针对单条数据进行新增、编辑、删除，调用 Many 端的模型接口即可。
 
@@ -87,7 +98,7 @@ OneToMany 字段的数据，一般在客户端针对单条数据进行新增、�
 
 （2）字段值不为空时， `[{...}, {...}]` 即 Many 端的数据列表结构时，自动识别出 Many 端的新增、编辑和删除的记录，并进行相应的处理。
 
-### 1.11 `ManyToMany` 多对多
+### 1.13 `ManyToMany` 多对多
 
 （1） `ManyToMany` 字段的更新
 
